@@ -1,1 +1,1 @@
-# fsgan
+# FSGAN v1
