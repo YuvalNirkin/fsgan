@@ -95,11 +95,11 @@ def crop2img(img, crop, bbox):
 
 def main(source_path, target_path,
          arch='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
-         reenactment_model_path='../weights/ijbc_v2_msrunet_256_2_0_reenactment.pth',
-         seg_model_path='../weights/lfw_figaro_unet_256_segmentation.pth',
-         inpainting_model_path='../weights/ijbc_v2_msrunet_256_2_0_inpainting.pth',
-         blend_model_path='../weights/ijbc_v2_msrunet_256_2_0_blending.pth',
-         pose_model_path='../weights/hopenet_robust_alpha1.pkl',
+         reenactment_model_path='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
+         seg_model_path='../weights/lfw_figaro_unet_256_2_0_segmentation_v1.pth',
+         inpainting_model_path='../weights/ijbc_msrunet_256_2_0_inpainting_v1.pth',
+         blend_model_path='../weights/ijbc_msrunet_256_2_0_blending_v1.pth',
+         pose_model_path='../weights/hopenet_robust_alpha1.pth',
          pil_transforms1=None, pil_transforms2=None,
          tensor_transforms1=('landmark_transforms.ToTensor()',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
@@ -157,7 +157,7 @@ def main(source_path, target_path,
     # Initialize pose
     Gp = Hopenet().to(device)
     checkpoint = torch.load(pose_model_path)
-    Gp.load_state_dict(checkpoint)
+    Gp.load_state_dict(checkpoint['state_dict'])
     Gp.train(False)
 
     # Initialize transformations
@@ -297,15 +297,15 @@ if __name__ == "__main__":
     parser.add_argument('-a', '--arch',
                         default='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
                         help='model architecture object')
-    parser.add_argument('-rm', '--reenactment_model', default='../weights/ijbc_v2_msrunet_256_2_0_reenactment.pth',
+    parser.add_argument('-rm', '--reenactment_model', default='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
                         metavar='PATH', help='path to face reenactment model')
-    parser.add_argument('-sm', '--seg_model', default='../weights/lfw_figaro_unet_256_segmentation.pth', metavar='PATH',
-                        help='path to face segmentation model')
-    parser.add_argument('-im', '--inpainting_model', default='../weights/ijbc_v2_msrunet_256_2_0_inpainting.pth',
+    parser.add_argument('-sm', '--seg_model', default='../weights/lfw_figaro_unet_256_2_0_segmentation_v1.pth',
+                        metavar='PATH', help='path to face segmentation model')
+    parser.add_argument('-im', '--inpainting_model', default='../weights/ijbc_msrunet_256_2_0_inpainting_v1.pth',
                         metavar='PATH', help='path to face inpainting model')
-    parser.add_argument('-bm', '--blending_model', default='../weights/ijbc_v2_msrunet_256_2_0_blending.pth',
+    parser.add_argument('-bm', '--blending_model', default='../weights/ijbc_msrunet_256_2_0_blending_v1.pth',
                         metavar='PATH', help='path to face blending model')
-    parser.add_argument('-pm', '--pose_model', default='../weights/hopenet_robust_alpha1.pkl', metavar='PATH',
+    parser.add_argument('-pm', '--pose_model', default='../weights/hopenet_robust_alpha1.pth', metavar='PATH',
                         help='path to face pose model')
     parser.add_argument('-pt1', '--pil_transforms1', default=None, nargs='+', help='first PIL transforms')
     parser.add_argument('-pt2', '--pil_transforms2', default=None, nargs='+', help='second PIL transforms')

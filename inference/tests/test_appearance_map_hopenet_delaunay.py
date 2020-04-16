@@ -120,7 +120,10 @@ def render_appearance_map(tri, points, query_point=None):
     return img[:, :, 2::-1]
 
 
-def main(source_path, target_path, frontal_landmarks_path, arch, model_path, pose_model_path,
+def main(source_path, target_path, frontal_landmarks_path='frontal_landmarks_256_2_0.npy',
+         arch='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
+         model_path='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
+         pose_model_path='../weights/hopenet_robust_alpha1.pth',
          pil_transforms1=None, pil_transforms2=None,
          tensor_transforms1=('landmark_transforms.ToTensor()',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
@@ -141,7 +144,7 @@ def main(source_path, target_path, frontal_landmarks_path, arch, model_path, pos
     # Initialize pose
     Gp = Hopenet().to(device)
     checkpoint = torch.load(pose_model_path)
-    Gp.load_state_dict(checkpoint)
+    Gp.load_state_dict(checkpoint['state_dict'])
     Gp.train(False)
 
     # Initialize transformations
@@ -508,13 +511,14 @@ if __name__ == "__main__":
                         help='path to source video')
     parser.add_argument('-t', '--target', metavar='VIDEO',
                         help='paths to target video')
-    parser.add_argument('-fl', '--frontal_landmarks',
+    parser.add_argument('-fl', '--frontal_landmarks', default='frontal_landmarks_256_2_0.npy',
                         help='paths to frontal landmarks (.npy)')
     parser.add_argument('-a', '--arch',
+                        default='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
                         help='model architecture object')
-    parser.add_argument('-m', '--model', metavar='PATH',
-                        help='path to face reenactment model')
-    parser.add_argument('-pm', '--pose_model', metavar='PATH',
+    parser.add_argument('-m', '--model', default='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
+                        metavar='PATH', help='path to face reenactment model')
+    parser.add_argument('-pm', '--pose_model', default='../weights/hopenet_robust_alpha1.pth', metavar='PATH',
                         help='path to face pose model')
     parser.add_argument('-pt1', '--pil_transforms1', default=None, nargs='+', help='first PIL transforms')
     parser.add_argument('-pt2', '--pil_transforms2', default=None, nargs='+', help='second PIL transforms')

@@ -44,7 +44,11 @@ def tensor2bgr(img_tensor):
     return output_img
 
 
-def main(input_path, arch, model_path, pose_model_path, pil_transforms1=None, pil_transforms2=None,
+def main(input_path,
+         arch='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
+         model_path=None,
+         pose_model_path='../weights/hopenet_robust_alpha1.pth',
+         pil_transforms1=None, pil_transforms2=None,
          tensor_transforms1=('landmark_transforms.ToTensor()',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
@@ -63,7 +67,7 @@ def main(input_path, arch, model_path, pose_model_path, pil_transforms1=None, pi
     # Initialize pose
     Gp = Hopenet().to(device)
     checkpoint = torch.load(pose_model_path)
-    Gp.load_state_dict(checkpoint)
+    Gp.load_state_dict(checkpoint['state_dict'])
     Gp.train(False)
 
     # Initialize landmarks to heatmaps
@@ -309,10 +313,11 @@ if __name__ == "__main__":
     parser.add_argument('input', metavar='VIDEO',
                         help='path to input video')
     parser.add_argument('-a', '--arch',
+                        default='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
                         help='model architecture object')
     parser.add_argument('-m', '--model', metavar='PATH',
                         help='path to face reenactment model')
-    parser.add_argument('-pm', '--pose_model', metavar='PATH',
+    parser.add_argument('-pm', '--pose_model', default='../weights/hopenet_robust_alpha1.pth', metavar='PATH',
                         help='path to face pose model')
     parser.add_argument('-pt1', '--pil_transforms1', default=None, nargs='+', help='first PIL transforms')
     parser.add_argument('-pt2', '--pil_transforms2', default=None, nargs='+', help='second PIL transforms')

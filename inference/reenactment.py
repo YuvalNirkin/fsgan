@@ -85,7 +85,7 @@ def prepare_generator_input(img, landmarks, sigma=2):
 
 def main(source_path, target_path,
          arch='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
-         model_path='../weights/ijbc_v2_msrunet_256_2_0_reenactment.pth',
+         model_path='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
          pil_transforms1=None, pil_transforms2=None,
          tensor_transforms1=('landmark_transforms.ToTensor()',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
@@ -233,7 +233,7 @@ if __name__ == "__main__":
     parser.add_argument('-a', '--arch',
                         default='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
                         help='model architecture object')
-    parser.add_argument('-m', '--model', default='../weights/ijbc_v2_msrunet_256_2_0_reenactment.pth', metavar='PATH',
+    parser.add_argument('-m', '--model', default='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth', metavar='PATH',
                         help='path to face reenactment model')
     parser.add_argument('-pt1', '--pil_transforms1', default=None, nargs='+', help='first PIL transforms')
     parser.add_argument('-pt2', '--pil_transforms2', default=None, nargs='+', help='second PIL transforms')

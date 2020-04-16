@@ -93,7 +93,7 @@ def crop2img(img, crop, bbox):
     return out_img
 
 
-def main(source_path, output_path, seg_model_path='../weights/lfw_figaro_unet_256_segmentation.pth',
+def main(source_path, output_path, seg_model_path='../weights/lfw_figaro_unet_256_2_0_segmentation_v1.pth',
          pose_model_path='../weights/hopenet_robust_alpha1.pkl',
          pil_transforms=None,
          tensor_transforms=('landmark_transforms.ToTensor()',
@@ -239,8 +239,8 @@ if __name__ == "__main__":
                         help='path to source video')
     parser.add_argument('-o', '--output', default=None, metavar='PATH',
                         help='output video path')
-    parser.add_argument('-sm', '--seg_model', default='../weights/lfw_figaro_unet_256_segmentation.pth', metavar='PATH',
-                        help='path to face segmentation model')
+    parser.add_argument('-sm', '--seg_model', default='../weights/lfw_figaro_unet_256_2_0_segmentation_v1.pth',
+                        metavar='PATH', help='path to face segmentation model')
     parser.add_argument('-pm', '--pose_model', default='../weights/hopenet_robust_alpha1.pkl', metavar='PATH',
                         help='path to face pose model')
     parser.add_argument('-pt', '--pil_transforms', default=None, nargs='+', help='PIL transforms')
