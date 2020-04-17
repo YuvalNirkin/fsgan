@@ -58,7 +58,7 @@ parser.add_argument('-bm', '--blending_model', default='../weights/ijbc_msrunet_
                     metavar='PATH', help='blending model')
 parser.add_argument('-ci', '--criterion_id', default="vgg_loss.VGGLoss('../weights/vggface2_vgg19_256_1_2_id.pth')",
                     metavar='OBJ', help='id criterion object')
-parser.add_argument('-mr', '--min_radius', default=0.5, type=float, metavar='F',
+parser.add_argument('-mr', '--min_radius', default=2.0, type=float, metavar='F',
                     help='minimum distance between points in the appearance map')
 parser.add_argument('-oc', '--output_crop', action='store_true',
                     help='output crop around the face instead of full frame')

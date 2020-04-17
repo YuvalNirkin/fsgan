@@ -51,7 +51,7 @@ parser.add_argument('-rm', '--reenactment_model', metavar='PATH',
                     default='../weights/nfv_msrunet_256_1_2_reenactment_v2.1.pth', help='reenactment model')
 parser.add_argument('-ci', '--criterion_id', default="vgg_loss.VGGLoss('../weights/vggface2_vgg19_256_1_2_id.pth')",
                     metavar='OBJ', help='id criterion object')
-parser.add_argument('-mr', '--min_radius', default=0.5, type=float, metavar='F',
+parser.add_argument('-mr', '--min_radius', default=2.0, type=float, metavar='F',
                     help='minimum distance between points in the appearance map')
 
 finetune = parser.add_argument_group('finetune')
@@ -62,9 +62,9 @@ finetune.add_argument('-fi', '--finetune_iterations', default=400, type=int, met
 finetune.add_argument('-fl', '--finetune_lr', default=1e-4, type=float, metavar='F',
                       help='finetune learning rate')
 finetune.add_argument('-fb', '--finetune_batch_size', default=4, type=int, metavar='N',
-                      help='finetune batch size (default: 4)')
+                      help='finetune batch size')
 finetune.add_argument('-fw', '--finetune_workers', default=4, type=int, metavar='N',
-                      help='finetune workers (default: 4)')
+                      help='finetune workers')
 finetune.add_argument('-fs', '--finetune_save', action='store_true',
                       help='enable saving finetune checkpoint')
 d = parser.get_default
@@ -430,7 +430,7 @@ def main(source, target, output=None, select_source=d('select_source'), select_t
         finetune_batch_size=finetune_batch_size, finetune_workers=finetune_workers, finetune_save=finetune_save,
         batch_size=batch_size, reenactment_model=reenactment_model, criterion_id=criterion_id, min_radius=min_radius)
     if len(source) == 1 and len(target) == 1 and os.path.isfile(source[0]) and os.path.isfile(target[0]):
-        face_reenactment(source, target, output, select_source, select_target)
+        face_reenactment(source[0], target[0], output, select_source, select_target)
     else:
         batch(source, target, output, face_reenactment, postfix='.mp4', skip_existing=True)
 
