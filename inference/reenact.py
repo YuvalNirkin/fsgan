@@ -106,7 +106,7 @@ class FaceReenactment(VideoProcessBase):
             lms_model=lms_model, lms_batch_size=lms_batch_size, landmarks_postfix=landmarks_postfix,
             cache_landmarks=True, smooth_landmarks=smooth_landmarks, seg_model=seg_model,
             seg_batch_size=seg_batch_size, segmentation_postfix=segmentation_postfix,
-            cache_segmentation=cache_segmentation, smooth_segmentation=smooth_segmentation,
+            cache_segmentation=True, smooth_segmentation=smooth_segmentation,
             seg_remove_mouth=seg_remove_mouth)
         self.batch_size = batch_size
         self.min_radius = min_radius
@@ -261,7 +261,7 @@ class FaceReenactment(VideoProcessBase):
         print(f'=> Face reenactment: "{src_vid_seq_name}" -> "{tgt_vid_seq_name}"...')
 
         # For each batch of frames in the target video
-        for i, (src_frame, src_landmarks, src_poses, bw, tgt_frame, tgt_landmarks, tgt_pose, tgt_seg) \
+        for i, (src_frame, src_landmarks, src_poses, bw, tgt_frame, tgt_landmarks, tgt_pose, tgt_mask) \
                 in enumerate(tqdm(appearance_map_loader, unit='batches', file=sys.stdout)):
             # Prepare input
             for p in range(len(src_frame)):
