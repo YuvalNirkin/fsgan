@@ -28,7 +28,7 @@ every pair of faces can produce a high quality face swap.
 - PyTorch 1.4.0+.
 
 ## Installation
-TBD
+- [Ubuntu Installation Guide](https://github.com/YuvalNirkin/fsgan/wiki/Ubuntu-Installation-Guide)
 
 ## Inference
 TBD
