@@ -176,7 +176,7 @@ def main(source_path, target_path,
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
                              'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
-         output_path=None, min_radius=0.5, crop_size=256, reverse_output=False, verbose=0, output_crop=False,
+         output_path=None, min_radius=2.0, crop_size=256, reverse_output=False, verbose=0, output_crop=False,
          display=False):
     torch.set_grad_enabled(False)
 
@@ -444,7 +444,7 @@ if __name__ == "__main__":
                                  'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'))
     parser.add_argument('-o', '--output', default=None, metavar='DIR',
                         help='output directory')
-    parser.add_argument('-mr', '--min_radius', default=0.5, type=float, metavar='F',
+    parser.add_argument('-mr', '--min_radius', default=2.0, type=float, metavar='F',
                         help='minimum distance between points in the appearance map')
     parser.add_argument('-cs', '--crop_size', default=256, type=int, metavar='N',
                         help='crop size of the images')

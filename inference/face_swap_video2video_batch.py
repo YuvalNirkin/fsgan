@@ -21,7 +21,7 @@ def main(input, out_dir,
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
                              'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
-         min_radius=1.0, crop_size=256, reverse_output=False, verbose=0, output_crop=False, display=False):
+         min_radius=2.0, crop_size=256, reverse_output=False, verbose=0, output_crop=False, display=False):
     # Validate input
     if len(input) > 2:
         raise RuntimeError('input must contain either a single path or two paths!')
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument('-tt2', '--tensor_transforms2', nargs='+', help='second tensor transforms',
                         default=('landmark_transforms.ToTensor()',
                                  'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'))
-    parser.add_argument('-nr', '--min_radius', default=0.5, type=float, metavar='F',
+    parser.add_argument('-nr', '--min_radius', default=2.0, type=float, metavar='F',
                         help='minimum distance between points in the appearance map')
     parser.add_argument('-cs', '--crop_size', default=256, type=int, metavar='N',
                         help='crop size of the images')

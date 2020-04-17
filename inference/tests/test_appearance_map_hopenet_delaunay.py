@@ -129,7 +129,7 @@ def main(source_path, target_path, frontal_landmarks_path='frontal_landmarks_256
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
                              'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
-         output_path=None, min_radius=0.5, crop_size=256, verbose=0):
+         output_path=None, min_radius=2.0, crop_size=256, verbose=0):
     torch.set_grad_enabled(False)
     frontal_landmarks = np.load(frontal_landmarks_path)
     fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=True)
@@ -530,7 +530,7 @@ if __name__ == "__main__":
                                  'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'))
     parser.add_argument('-o', '--output', default=None, metavar='PATH',
                         help='output video path')
-    parser.add_argument('-mr', '--min_radius', default=0.5, type=float, metavar='F',
+    parser.add_argument('-mr', '--min_radius', default=2.0, type=float, metavar='F',
                         help='minimum distance between points in the appearance map')
     parser.add_argument('-cs', '--crop_size', default=256, type=int, metavar='N',
                         help='crop size of the images')
