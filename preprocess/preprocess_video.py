@@ -22,15 +22,12 @@ from fsgan.utils.utils import set_device, load_model
 from fsgan.preprocess.detections2sequences_center import main as detections2sequences_main
 from fsgan.preprocess.crop_video_sequences import main as crop_video_sequences_main
 from fsgan.preprocess.crop_image_sequences import main as crop_image_sequences_main
-from fsgan.models.hopenet import Hopenet
-from fsgan.utils.img_utils import rgb2tensor, tensor2rgb
 from fsgan.datasets.video_inference_dataset import VideoInferenceDataset
 import fsgan.datasets.img_landmarks_transforms as img_landmarks_transforms
 from fsgan.datasets.img_landmarks_transforms import Resize, ToTensor
 from fsgan.utils.temporal_smoothing import TemporalSmoothing
 from fsgan.utils.landmarks_utils import LandmarksHeatMapEncoder, smooth_landmarks_98pts
-from fsgan.utils.seg_utils import encode_binary_mask
-from fsgan.tests.test_remove_inner_mouth import remove_inner_mouth
+from fsgan.utils.seg_utils import encode_binary_mask, remove_inner_mouth
 from fsgan.utils.batch import main as batch
 
 

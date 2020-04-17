@@ -7,7 +7,7 @@ This repository contains the source code for the video face swapping and face re
 > **FSGAN: Subject Agnostic Face Swapping and Reenactment**  
 > *International Conference on Computer Vision (ICCV), Seoul, Korea, 2019*  
 > Yuval Nirkin, Yosi Keller, Tal Hassner  
-> [Paper](http://openaccess.thecvf.com/content_ICCV_2019/papers/Nirkin_FSGAN_Subject_Agnostic_Face_Swapping_and_Reenactment_ICCV_2019_paper.pdf) &nbsp; [Video](https://www.youtube.com/watch?v=BsITEVX6hkE)
+> [Paper](https://arxiv.org/pdf/1908.05932.pdf) &nbsp; [Video](https://www.youtube.com/watch?v=BsITEVX6hkE)
 >
 > **Abstract:** *We present Face Swapping GAN (FSGAN) for face swapping and reenactment. Unlike previous work, FSGAN is subject agnostic and can be applied to pairs of faces without requiring training on those faces. To this end, we describe a number of technical contributions. We derive a novel recurrent neural network (RNN)–based approach for face reenactment which adjusts for both pose and expression variations and can be applied to a single image or a video sequence. For video sequences, we introduce continuous interpolation of the face views based on reenactment, Delaunay Triangulation, and barycentric coordinates. Occluded face regions are handled by a face completion network. Finally, we use a face blending network for seamless blending of the two faces while preserving target skin color and lighting conditions. This network uses a novel Poisson blending loss which combines Poisson optimization with perceptual loss. We compare our approach to existing state-of-the-art systems and show our results to be both qualitatively and quantitatively superior.*
 

@@ -2,6 +2,8 @@
 
 import io
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
 import cv2
 from PIL import Image
@@ -179,6 +181,75 @@ def decode_binary_mask(bytes):
     """
     return np.array(Image.open(io.BytesIO(bytes)))
     # return np.array(Image.open(io.BytesIO(bytes)).convert('L'))
+
+
+class SoftErosion(nn.Module):
+    """ Applies *soft erosion* on a binary mask, that is similar to the
+    `erosion morphology operation <https://en.wikipedia.org/wiki/Erosion_(morphology)>`_,
+    returning both a soft mask and a hard binary mask.
+
+    All values greater or equal to the the specified threshold will be set to 1 in both the soft and hard masks,
+    the other values will be 0 in the hard mask and will be gradually reduced to 0 in the soft mask.
+
+    Args:
+        kernel_size (int): The size of the erosion kernel size
+        threshold (float): The erosion threshold
+        iterations (int) The number of times to apply the erosion kernel
+    """
+    def __init__(self, kernel_size=15, threshold=0.6, iterations=1):
+        super(SoftErosion, self).__init__()
+        r = kernel_size // 2
+        self.padding = r
+        self.iterations = iterations
+        self.threshold = threshold
+
+        # Create kernel
+        y_indices, x_indices = torch.meshgrid(torch.arange(0., kernel_size), torch.arange(0., kernel_size))
+        dist = torch.sqrt((x_indices - r) ** 2 + (y_indices - r) ** 2)
+        kernel = dist.max() - dist
+        kernel /= kernel.sum()
+        kernel = kernel.view(1, 1, *kernel.shape)
+        self.register_buffer('weight', kernel)
+
+    def forward(self, x):
+        """ Apply the soft erosion operation.
+
+        Args:
+            x (torch.Tensor): A binary mask of shape (1, H, W)
+
+        Returns:
+            (torch.Tensor, torch.Tensor): Tuple containing:
+                - soft_mask (torch.Tensor): The soft mask of shape (1, H, W)
+                - hard_mask (torch.Tensor): The hard mask of shape (1, H, W)
+        """
+        x = x.float()
+        for i in range(self.iterations - 1):
+            x = torch.min(x, F.conv2d(x, weight=self.weight, groups=x.shape[1], padding=self.padding))
+        x = F.conv2d(x, weight=self.weight, groups=x.shape[1], padding=self.padding)
+
+        mask = x >= self.threshold
+        x[mask] = 1.0
+        x[~mask] /= x[~mask].max()
+
+        return x, mask
+
+
+def remove_inner_mouth(seg, landmarks):
+    """ Removes the inner part of the mouth, corresponding to the face landmarks, from a binary mask.
+
+    Args:
+        seg (np.array): A binary mask of shape (H, W)
+        landmarks (np.array): Face landmarks of shape (98, 2)
+
+    Returns:
+        np.array: The binary mask with the inner part of the mouth removed.
+    """
+    size = np.array(seg.shape[::-1])
+    mouth_pts = landmarks[88:96] * size
+    mouth_pts = np.round(mouth_pts).astype(int)
+    out_seg = cv2.fillPoly(seg.astype('uint8'), [mouth_pts], (0, 0, 0))
+
+    return out_seg.astype(seg.dtype)
 
 
 def main(input_path):

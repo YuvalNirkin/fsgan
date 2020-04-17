@@ -27,8 +27,7 @@ from fsgan.utils.obj_factory import obj_factory
 from fsgan.utils.utils import load_model
 from fsgan.utils.img_utils import bgr2tensor, tensor2bgr, create_pyramid
 from fsgan.utils.landmarks_utils import LandmarksHeatMapDecoder
-from fsgan.utils.seg_utils import blend_seg_label
-from fsgan.tests.test_soft_erosion_02 import SoftErosion
+from fsgan.utils.seg_utils import blend_seg_label, SoftErosion
 from fsgan.datasets.img_lms_pose_transforms import RandomHorizontalFlip, Rotate, Pyramids, ToTensor, Normalize
 from fsgan.datasets import img_lms_pose_transforms
 from fsgan.datasets.seq_dataset import SeqInferenceDataset, SingleSeqRandomPairDataset
@@ -72,9 +71,9 @@ finetune.add_argument('-fi', '--finetune_iterations', default=400, type=int, met
 finetune.add_argument('-fl', '--finetune_lr', default=1e-4, type=float, metavar='F',
                       help='finetune learning rate')
 finetune.add_argument('-fb', '--finetune_batch_size', default=4, type=int, metavar='N',
-                      help='finetune batch size (default: 4)')
+                      help='finetune batch size')
 finetune.add_argument('-fw', '--finetune_workers', default=4, type=int, metavar='N',
-                      help='finetune workers (default: 4)')
+                      help='finetune workers')
 finetune.add_argument('-fs', '--finetune_save', action='store_true',
                       help='enable saving finetune checkpoint')
 d = parser.get_default
@@ -154,7 +153,7 @@ class FaceSwapping(VideoProcessBase):
             self.criterion_id.vgg = nn.DataParallel(self.criterion_id.vgg, self.gpus)
 
         # Initialize soft erosion
-        self.smooth_mask = SoftErosion(kernel_size=21, thresh=0.6).to(self.device)
+        self.smooth_mask = SoftErosion(kernel_size=21, threshold=0.6).to(self.device)
 
         # Initialize video writer
         self.video_renderer = FaceSwappingRenderer(self.display, self.verbose, self.output_crop, self.resolution,
