@@ -25,10 +25,14 @@ every pair of faces can produce a high quality face swap.
 - High-end NVIDIA GPUs with at least 11GB of DRAM.
 - Either Linux or Windows. We recommend Linux for better performance.
 - CUDA Toolkit 10.1, CUDNN 7.5, and the latest NVIDIA driver.
-- PyTorch 1.4.0+.
+- Python 3.6+ and PyTorch 1.4.0+.
 
 ## Installation
-- [Ubuntu Installation Guide](https://github.com/YuvalNirkin/fsgan/wiki/Ubuntu-Installation-Guide)
+- [Ubuntu installation guide](https://github.com/YuvalNirkin/fsgan/wiki/Ubuntu-Installation-Guide)
+
+For accessing FSGAN's pretrained models and auxiliary data, please fill out
+[this form](https://docs.google.com/forms/d/e/1FAIpQLScyyNWoFvyaxxfyaPLnCIAxXgdxLEMwR9Sayjh3JpWseuYlOA/viewform?usp=sf_link).
+We will then send you a link to FSGAN's shared directory and download script.
 
 ## Inference
 TBD
