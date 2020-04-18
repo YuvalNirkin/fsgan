@@ -211,7 +211,7 @@ def main(source_path, target_path, frontal_landmarks_path='frontal_landmarks_256
             output_filename = os.path.splitext(os.path.basename(source_path))[0] + '_' + \
                               os.path.splitext(os.path.basename(target_path))[0] + '.mp4'
             output_path = os.path.join(output_path, output_filename)
-        fourcc = cv2.VideoWriter_fourcc(*'x264')
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
         fourcc = -1 #
         fourcc = cv2.VideoWriter_fourcc(*'hev1')  #
         # out_vid = cv2.VideoWriter(output_path, fourcc, fps, (crop_size * 3, crop_size))

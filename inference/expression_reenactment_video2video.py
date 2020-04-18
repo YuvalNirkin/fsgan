@@ -210,7 +210,7 @@ def main(source_path, target_path,
                 output_filename = os.path.splitext(os.path.basename(source_path))[0] + '_' + \
                                   os.path.splitext(os.path.basename(target_path))[0] + '.mp4'
             output_path = os.path.join(output_path, output_filename)
-        fourcc = cv2.VideoWriter_fourcc(*'x264')
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
         out_vid_size = (crop_size, crop_size) if verbose == 0 else (crop_size * 3, crop_size * 2)
         out_vid = cv2.VideoWriter(output_path, fourcc, fps, out_vid_size)
     else:

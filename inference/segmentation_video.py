@@ -153,7 +153,7 @@ def main(source_path, output_path, seg_model_path='../weights/lfw_figaro_unet_25
         if os.path.isdir(output_path):
             output_filename = os.path.splitext(os.path.basename(source_path))[0] + '.mp4'
             output_path = os.path.join(output_path, output_filename)
-        fourcc = cv2.VideoWriter_fourcc(*'x264')
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
         if output_crop:
             out_vid_size = (crop_size, crop_size)
         else:

@@ -87,7 +87,7 @@ def main(source_path, target_path,
             output_filename = os.path.splitext(os.path.basename(source_path))[0] + '_' + \
                               os.path.splitext(os.path.basename(target_path))[0] + '.mp4'
             output_path = os.path.join(output_path, output_filename)
-        fourcc = cv2.VideoWriter_fourcc(*'x264')
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
         out_vid = cv2.VideoWriter(output_path, fourcc, fps,
                                   (source_cropped_bgr.shape[1]*3, source_cropped_bgr.shape[0]))
     else:
