@@ -95,7 +95,7 @@ def crop2img(img, crop, bbox):
 
 def main(source_path, output_path, seg_model_path='../weights/lfw_figaro_unet_256_2_0_segmentation_v1.pth',
          pose_model_path='../weights/hopenet_robust_alpha1.pkl',
-         pil_transforms=None,
+         pil_transforms=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)'),
          tensor_transforms=('landmark_transforms.ToTensor()',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          crop_size=256, verbose=0, output_crop=False, display=False, draw_bbox=0, start_time=0.0, start_interp=0.0,
@@ -200,7 +200,7 @@ def main(source_path, output_path, seg_model_path='../weights/lfw_figaro_unet_25
             mask = (source_seg_pred_tensor.argmax(1) == 1).unsqueeze(1)
             mask = mask if mask_face else ~mask
             source_img_tensor.masked_fill_(mask, background_value)
-        render_img = tensor2bgr(source_img_tensor)
+        # render_img = tensor2bgr(source_img_tensor)
 
         # Effects
         # curr_time = i / fps
@@ -243,7 +243,9 @@ if __name__ == "__main__":
                         metavar='PATH', help='path to face segmentation model')
     parser.add_argument('-pm', '--pose_model', default='../weights/hopenet_robust_alpha1.pkl', metavar='PATH',
                         help='path to face pose model')
-    parser.add_argument('-pt', '--pil_transforms', default=None, nargs='+', help='PIL transforms')
+    parser.add_argument('-pt', '--pil_transforms', nargs='+',
+                        default=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)'),
+                        help='PIL transforms')
     parser.add_argument('-tt', '--tensor_transforms', nargs='+', help='tensor transforms',
                         default=('landmark_transforms.ToTensor()',
                                  'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'))

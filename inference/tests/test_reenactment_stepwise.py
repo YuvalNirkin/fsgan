@@ -3,19 +3,14 @@ from math import cos, sin, atan2, asin
 import face_alignment
 import cv2
 import numpy as np
-import pickle
-from tqdm import tqdm
-from PIL import Image
 import torch
-import torchvision.transforms.functional as F
-from fsgan.data.landmark_transforms import crop_img, scale_bbox, Resize, generate_heatmaps
 import fsgan.data.landmark_transforms as landmark_transforms
 import fsgan.utils.utils as utils
+from fsgan.utils.img_utils import create_pyramid
 from fsgan.utils.obj_factory import obj_factory
 from fsgan.utils.video_utils import extract_landmarks_bboxes_euler_3d_from_video
 from fsgan.models.hopenet import Hopenet
 from fsgan.utils.heatmap import LandmarkHeatmap
-import utils
 
 
 def unnormalize(tensor, mean, std):
@@ -46,14 +41,17 @@ def tensor2bgr(img_tensor):
 
 def main(input_path,
          arch='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
-         model_path=None,
-         pose_model_path='../weights/hopenet_robust_alpha1.pth',
-         pil_transforms1=None, pil_transforms2=None,
+         model_path='../../weights/ijbc_msrunet_256_1_2_reenactment_stepwise_v1.pth',
+         pose_model_path='../../weights/hopenet_robust_alpha1.pth',
+         pil_transforms1=('landmark_transforms.FaceAlignCrop(bbox_scale=1.2)', 'landmark_transforms.Resize(256)',
+                          'landmark_transforms.Pyramids(2)'),
+         pil_transforms2=('landmark_transforms.FaceAlignCrop(bbox_scale=1.2)', 'landmark_transforms.Resize(256)',
+                          'landmark_transforms.Pyramids(2)'),
          tensor_transforms1=('landmark_transforms.ToTensor()',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
                              'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
-         out_dir=None, crop_size=256, hor_angles=(0., 10., 20., 30., 40., 50.), reenactment_iterations=(1,)):
+         out_dir=None, crop_size=256, hor_angles=(0., -10., -20., -30., -40., -50.), reenactment_iterations=(1, 3)):
     torch.set_grad_enabled(False)
 
     # Initialize models
@@ -159,7 +157,7 @@ def main(input_path,
             # Iterative reenactment
             out_img_tensor = source_tensor
             for curr_target_landmarks in target_landmarks_sequence:
-                out_img_tensor = utils.create_pyramid(out_img_tensor, 2)
+                out_img_tensor = create_pyramid(out_img_tensor, 2)
                 input_tensor = []
                 for j in range(len(out_img_tensor)):
                     curr_target_landmarks[j] = curr_target_landmarks[j].unsqueeze(0).to(device)
@@ -315,12 +313,16 @@ if __name__ == "__main__":
     parser.add_argument('-a', '--arch',
                         default='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
                         help='model architecture object')
-    parser.add_argument('-m', '--model', metavar='PATH',
-                        help='path to face reenactment model')
-    parser.add_argument('-pm', '--pose_model', default='../weights/hopenet_robust_alpha1.pth', metavar='PATH',
+    parser.add_argument('-m', '--model', default='../../weights/ijbc_msrunet_256_1_2_reenactment_stepwise_v1.pth',
+                        metavar='PATH', help='path to face reenactment model')
+    parser.add_argument('-pm', '--pose_model', default='../../weights/hopenet_robust_alpha1.pth', metavar='PATH',
                         help='path to face pose model')
-    parser.add_argument('-pt1', '--pil_transforms1', default=None, nargs='+', help='first PIL transforms')
-    parser.add_argument('-pt2', '--pil_transforms2', default=None, nargs='+', help='second PIL transforms')
+    parser.add_argument('-pt1', '--pil_transforms1', nargs='+', help='first PIL transforms',
+                        default=('landmark_transforms.FaceAlignCrop(bbox_scale=1.2)', 'landmark_transforms.Resize(256)',
+                                 'landmark_transforms.Pyramids(2)'))
+    parser.add_argument('-pt2', '--pil_transforms2', nargs='+', help='second PIL transforms',
+                        default=('landmark_transforms.FaceAlignCrop(bbox_scale=1.2)', 'landmark_transforms.Resize(256)',
+                                 'landmark_transforms.Pyramids(2)'))
     parser.add_argument('-tt1', '--tensor_transforms1', nargs='+', help='first tensor transforms',
                         default=('landmark_transforms.ToTensor()',
                                  'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'))
@@ -333,7 +335,7 @@ if __name__ == "__main__":
                         help='crop size of the images')
     parser.add_argument('-ha', '--hor_angles', default=(0., -10., -20., -30., -40., -50.), nargs='+', type=float,
                         metavar='F', help='horizontal angles for the test')
-    parser.add_argument('-ri', '--reenactment_iterations', default=(1,), nargs='+', type=int, metavar='N',
+    parser.add_argument('-ri', '--reenactment_iterations', default=(1, 3), nargs='+', type=int, metavar='N',
                         help='number of reenactment iterations for each row of the output figure')
     args = parser.parse_args()
     main(args.input, args.arch, args.model, args.pose_model, args.pil_transforms1, args.pil_transforms2,

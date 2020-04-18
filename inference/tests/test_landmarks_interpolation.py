@@ -11,9 +11,6 @@ from fsgan.data.landmark_transforms import crop_img, scale_bbox, Resize, generat
 import fsgan.data.landmark_transforms as landmark_transforms
 import fsgan.utils.utils as utils
 from fsgan.utils.obj_factory import obj_factory
-from video_landmark_keyframes.utils import extract_landmarks_bboxes_from_video
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import fsgan.utils.estimate_pose as estimate_pose
 
 
@@ -106,8 +103,11 @@ def plot_kpt(image, kpt, circle_color=(0, 0, 255), line_color=(255, 255, 255), l
 
 def main(source_path, target_path, frontal_path='frontal.jpg',
          arch='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
-         model_path='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
-         pil_transforms1=None, pil_transforms2=None,
+         model_path='../../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
+         pil_transforms1=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)',
+                          'landmark_transforms.Pyramids(2)'),
+         pil_transforms2=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)',
+                          'landmark_transforms.Pyramids(2)', 'landmark_transforms.LandmarksToHeatmaps'),
          tensor_transforms1=('landmark_transforms.ToTensor()',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
@@ -260,10 +260,14 @@ if __name__ == "__main__":
     parser.add_argument('-a', '--arch',
                         default='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
                         help='model architecture object')
-    parser.add_argument('-m', '--model', default='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
+    parser.add_argument('-m', '--model', default='../../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
                         metavar='PATH', help='path to face reenactment model')
-    parser.add_argument('-pt1', '--pil_transforms1', default=None, nargs='+', help='first PIL transforms')
-    parser.add_argument('-pt2', '--pil_transforms2', default=None, nargs='+', help='second PIL transforms')
+    parser.add_argument('-pt1', '--pil_transforms1', nargs='+', help='first PIL transforms',
+                        default=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)',
+                                 'landmark_transforms.Pyramids(2)'))
+    parser.add_argument('-pt2', '--pil_transforms2', nargs='+', help='second PIL transforms',
+                        default=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)',
+                                 'landmark_transforms.Pyramids(2)', 'landmark_transforms.LandmarksToHeatmaps'))
     parser.add_argument('-tt1', '--tensor_transforms1', nargs='+', help='first tensor transforms',
                         default=('landmark_transforms.ToTensor()',
                                  'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'))

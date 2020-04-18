@@ -14,6 +14,7 @@ import fsgan.data.landmark_transforms as landmark_transforms
 import fsgan.utils.utils as utils
 from fsgan.utils.obj_factory import obj_factory
 from fsgan.utils.video_utils import extract_landmarks_bboxes_euler_from_video
+from fsgan.models.hopenet import Hopenet
 
 
 def process_image(fa, img, size=256):
@@ -86,7 +87,11 @@ def prepare_generator_input(img, landmarks, sigma=2):
 def main(source_path, target_path,
          arch='res_unet_split.MultiScaleResUNet(in_nc=71,out_nc=(3,3),flat_layers=(2,0,2,3),ngf=128)',
          model_path='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth',
-         pil_transforms1=None, pil_transforms2=None,
+         pose_model_path='../weights/hopenet_robust_alpha1.pth',
+         pil_transforms1=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)',
+                          'landmark_transforms.Pyramids(2)'),
+         pil_transforms2=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)',
+                          'landmark_transforms.Pyramids(2)', 'landmark_transforms.LandmarksToHeatmaps'),
          tensor_transforms1=('landmark_transforms.ToTensor()',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
@@ -101,6 +106,12 @@ def main(source_path, target_path,
     checkpoint = torch.load(model_path)
     G.load_state_dict(checkpoint['state_dict'])
     G.train(False)
+
+    # Initialize pose
+    Gp = Hopenet().to(device)
+    checkpoint = torch.load(pose_model_path)
+    Gp.load_state_dict(checkpoint['state_dict'])
+    Gp.train(False)
 
     # Initialize transformations
     pil_transforms1 = obj_factory(pil_transforms1) if pil_transforms1 is not None else []
@@ -120,33 +131,11 @@ def main(source_path, target_path,
     source_cropped_bgr = tensor2bgr(source_tensor[0] if isinstance(source_tensor, list) else source_tensor)
     for i in range(len(source_tensor)):
         source_tensor[i] = source_tensor[i].to(device)
-    # source_cropped_rgb, source_landmarks = process_image(fa, source_rgb, size)
-    # if source_cropped_rgb is None:
-    #     raise RuntimeError("Couldn't detect a face in source image: " + source_path)
-    # source_cropped_bgr = source_cropped_rgb[:, :, ::-1].copy()
-    # source_tensor, source_landmarks_tensor = prepare_generator_input(source_cropped_rgb, source_landmarks)
-    # source_tensor.to(device)
 
     # Extract landmarks and bounding boxes from target video
-    frame_indices, landmarks, bboxes, eulers = extract_landmarks_bboxes_euler_from_video(target_path)
+    frame_indices, landmarks, bboxes, eulers = extract_landmarks_bboxes_euler_from_video(target_path, Gp, device=device)
     if frame_indices.size == 0:
         raise RuntimeError('No faces were detected in the target video: ' + target_path)
-
-    # # Smooth landmarks
-    # kernel_size = 7
-    # w = np.hamming(7)
-    # # w = np.ones(kernel_size)
-    # w /= w.sum()
-    # landmarks = landmarks.reshape(landmarks.shape[0], -1)
-    # landmarks_padded = np.pad(landmarks, ((kernel_size // 2, kernel_size // 2), (0, 0)), 'reflect')
-    # for i in range(landmarks.shape[1]):
-    #     landmarks[:, i] = np.convolve(w, landmarks_padded[:, i], mode='valid')
-    # landmarks = landmarks.reshape(-1, 68, 2)
-    #
-    # # Smooth bounding boxes
-    # bboxes_padded = np.pad(bboxes, ((kernel_size // 2, kernel_size // 2), (0, 0)), 'reflect')
-    # for i in range(bboxes.shape[1]):
-    #     bboxes[:, i] = np.convolve(w, bboxes_padded[:, i], mode='valid')
 
     # Open target video file
     cap = cv2.VideoCapture(target_path)
@@ -235,8 +224,14 @@ if __name__ == "__main__":
                         help='model architecture object')
     parser.add_argument('-m', '--model', default='../weights/ijbc_msrunet_256_2_0_reenactment_v1.pth', metavar='PATH',
                         help='path to face reenactment model')
-    parser.add_argument('-pt1', '--pil_transforms1', default=None, nargs='+', help='first PIL transforms')
-    parser.add_argument('-pt2', '--pil_transforms2', default=None, nargs='+', help='second PIL transforms')
+    parser.add_argument('-pm', '--pose_model', default='../weights/hopenet_robust_alpha1.pth', metavar='PATH',
+                        help='path to face pose model')
+    parser.add_argument('-pt1', '--pil_transforms1', nargs='+', help='first PIL transforms',
+                        default=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)',
+                                 'landmark_transforms.Pyramids(2)'))
+    parser.add_argument('-pt2', '--pil_transforms2', nargs='+', help='second PIL transforms',
+                        default=('landmark_transforms.FaceAlignCrop', 'landmark_transforms.Resize(256)',
+                                 'landmark_transforms.Pyramids(2)', 'landmark_transforms.LandmarksToHeatmaps'))
     parser.add_argument('-tt1', '--tensor_transforms1', nargs='+', help='first tensor transforms',
                         default=('landmark_transforms.ToTensor()',
                                  'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'))
@@ -248,5 +243,5 @@ if __name__ == "__main__":
     parser.add_argument('-cs', '--crop_size', default=256, type=int, metavar='N',
                         help='crop size of the images')
     args = parser.parse_args()
-    main(args.source, args.target, args.arch, args.model, args.pil_transforms1, args.pil_transforms2,
+    main(args.source, args.target, args.arch, args.model, args.pose_model, args.pil_transforms1, args.pil_transforms2,
          args.tensor_transforms1, args.tensor_transforms2, args.output, args.crop_size)
