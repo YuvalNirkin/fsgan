@@ -132,7 +132,7 @@ def main(source_path, target_path, frontal_landmarks_path='frontal_landmarks_256
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
                              'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
-         output_path=None, min_radius=2.0, crop_size=256, verbose=0):
+         output_path=None, min_radius=2.0, crop_size=256, display=False, verbose=0):
     torch.set_grad_enabled(False)
     frontal_landmarks = np.load(frontal_landmarks_path)
     fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=True)
@@ -349,9 +349,10 @@ def main(source_path, target_path, frontal_landmarks_path='frontal_landmarks_256
 
         if out_vid is not None:
             out_vid.write(render_img)
-        cv2.imshow('render_img', render_img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        if out_vid is None or display:
+            cv2.imshow('render_img', render_img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
 
 def extract_landmarks_bboxes_euler_from_video(fa, Gp, video_path, frontal_landmarks, img_size=(224, 224), scale=1.2,
@@ -541,9 +542,11 @@ if __name__ == "__main__":
                         help='minimum distance between points in the appearance map')
     parser.add_argument('-cs', '--crop_size', default=256, type=int, metavar='N',
                         help='crop size of the images')
+    parser.add_argument('-d', '--display', action='store_true',
+                        help='display the rendering')
     parser.add_argument('-v', '--verbose', default=0, type=int, metavar='N',
                         help='number of steps between each loss plot')
     args = parser.parse_args()
     main(args.source, args.target, args.frontal_landmarks, args.arch, args.model, args.pose_model, args.pil_transforms1,
          args.pil_transforms2, args.tensor_transforms1, args.tensor_transforms2, args.output, args.min_radius,
-         args.crop_size, args.verbose)
+         args.crop_size, args.display, args.verbose)

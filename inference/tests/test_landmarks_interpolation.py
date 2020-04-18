@@ -112,7 +112,7 @@ def main(source_path, target_path, frontal_path='frontal.jpg',
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
                              'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
-         output_path=None, crop_size=256):
+         output_path=None, crop_size=256, display=False):
     # Initialize models
     fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, flip_input=True)
     device, gpus = utils.set_device()
@@ -241,10 +241,12 @@ def main(source_path, target_path, frontal_path='frontal.jpg',
         target_render = plot_kpt(target_cropped_bgr, target_landmarks[0].numpy())
         # cv2.imshow('target', target_render)
         render_img = np.concatenate((source_render, interp_render, target_render), axis=1)
-        cv2.imshow('render', render_img)
         if out_vid is not None:
             out_vid.write(render_img)
-        cv2.waitKey(1)
+        if out_vid is None or display:
+            cv2.imshow('render_img', render_img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
 
 if __name__ == "__main__":
@@ -278,6 +280,8 @@ if __name__ == "__main__":
                         help='output video path')
     parser.add_argument('-cs', '--crop_size', default=256, type=int, metavar='N',
                         help='crop size of the images')
+    parser.add_argument('-d', '--display', action='store_true',
+                        help='display the rendering')
     args = parser.parse_args()
     main(args.source, args.target, args.frontal, args.arch, args.model, args.pil_transforms1, args.pil_transforms2,
-         args.tensor_transforms1, args.tensor_transforms2, args.output, args.crop_size)
+         args.tensor_transforms1, args.tensor_transforms2, args.output, args.crop_size, args.display)

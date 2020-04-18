@@ -96,7 +96,7 @@ def main(source_path, target_path,
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
                              'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
-         output_path=None, crop_size=256):
+         output_path=None, crop_size=256, display=False):
     torch.set_grad_enabled(False)
 
     # Initialize models
@@ -201,9 +201,10 @@ def main(source_path, target_path,
         render_img = np.concatenate((source_cropped_bgr, out_img_bgr, frame_cropped_bgr), axis=1)
         if out_vid is not None:
             out_vid.write(render_img)
-        cv2.imshow('render_img', render_img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        if out_vid is None or display:
+            cv2.imshow('render_img', render_img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     # for point in np.round(source_landmarks).astype(int):
     #     cv2.circle(source_cropped_bgr, (point[0], point[1]), 2, (0, 0, 255), -1)
@@ -242,6 +243,8 @@ if __name__ == "__main__":
                         help='output video path')
     parser.add_argument('-cs', '--crop_size', default=256, type=int, metavar='N',
                         help='crop size of the images')
+    parser.add_argument('-d', '--display', action='store_true',
+                        help='display the rendering')
     args = parser.parse_args()
     main(args.source, args.target, args.arch, args.model, args.pose_model, args.pil_transforms1, args.pil_transforms2,
-         args.tensor_transforms1, args.tensor_transforms2, args.output, args.crop_size)
+         args.tensor_transforms1, args.tensor_transforms2, args.output, args.crop_size, args.display)

@@ -108,7 +108,7 @@ def main(source_path, target_path,
                             'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
          tensor_transforms2=('landmark_transforms.ToTensor()',
                              'transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])'),
-         output_path=None, crop_size=256, verbose=0, output_crop=False):
+         output_path=None, crop_size=256, verbose=0, output_crop=False, display=False):
     torch.set_grad_enabled(False)
 
     # Initialize models
@@ -284,9 +284,10 @@ def main(source_path, target_path,
             render_img = np.concatenate((render_img1, render_img2, render_img3), axis=0)
         if out_vid is not None:
             out_vid.write(render_img)
-        cv2.imshow('render_img', render_img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        if out_vid is None or display:
+            cv2.imshow('render_img', render_img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
 
 if __name__ == "__main__":
@@ -330,7 +331,9 @@ if __name__ == "__main__":
                         help='number of steps between each loss plot')
     parser.add_argument('-oc', '--output_crop', action='store_true',
                         help='output crop around the face')
+    parser.add_argument('-d', '--display', action='store_true',
+                        help='display the rendering')
     args = parser.parse_args()
     main(args.source, args.target, args.arch, args.reenactment_model, args.seg_model, args.inpainting_model,
          args.blending_model, args.pose_model, args.pil_transforms1, args.pil_transforms2, args.tensor_transforms1,
-         args.tensor_transforms2, args.output, args.crop_size, args.verbose, args.output_crop)
+         args.tensor_transforms2, args.output, args.crop_size, args.verbose, args.output_crop, args.display)
