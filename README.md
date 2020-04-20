@@ -35,7 +35,7 @@ For accessing FSGAN's pretrained models and auxiliary data, please fill out
 We will then send you a link to FSGAN's shared directory and download script.
 
 ## Inference
-TBD
+- [Face swapping](https://github.com/YuvalNirkin/fsgan/wiki/Face-Swapping-Inference)
 
 ## Training
 TBD
