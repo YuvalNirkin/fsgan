@@ -3,3 +3,4 @@
 __pycache__
 experiments/results
 weights
+download_fsgan_models.py

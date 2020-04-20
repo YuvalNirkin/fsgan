@@ -66,7 +66,7 @@ parser.add_argument('-oc', '--output_crop', action='store_true',
 finetune = parser.add_argument_group('finetune')
 finetune.add_argument('-f', '--finetune', action='store_true',
                       help='Toggle whether to finetune the reenactment generator (default: False)')
-finetune.add_argument('-fi', '--finetune_iterations', default=400, type=int, metavar='N',
+finetune.add_argument('-fi', '--finetune_iterations', default=800, type=int, metavar='N',
                       help='number of finetune iterations')
 finetune.add_argument('-fl', '--finetune_lr', default=1e-4, type=float, metavar='F',
                       help='finetune learning rate')
