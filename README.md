@@ -29,6 +29,7 @@ every pair of faces can produce a high quality face swap.
 
 ## Installation
 - [Ubuntu installation guide](https://github.com/YuvalNirkin/fsgan/wiki/Ubuntu-Installation-Guide)
+- [Windows installation guide](https://github.com/YuvalNirkin/fsgan/wiki/Windows-Installation-Guide)
 
 For accessing FSGAN's pretrained models and auxiliary data, please fill out
 [this form](https://docs.google.com/forms/d/e/1FAIpQLScyyNWoFvyaxxfyaPLnCIAxXgdxLEMwR9Sayjh3JpWseuYlOA/viewform?usp=sf_link).
