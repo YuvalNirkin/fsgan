@@ -34,7 +34,7 @@ class VideoRenderer(mp.Process):
         self._running = True
         self._input_queue = mp.Queue()
         self._reply_queue = mp.Queue()
-        self._fourcc = cv2.VideoWriter_fourcc(*'encoder_codec')
+        self._fourcc = cv2.VideoWriter_fourcc(*encoder_codec)
         self._in_vid = None
         self._out_vid = None
         self._seq = None
