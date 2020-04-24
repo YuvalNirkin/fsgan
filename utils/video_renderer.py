@@ -20,8 +20,10 @@ class VideoRenderer(mp.Process):
             verbose level zero
         resolution (int): Determines the size of cropped frames to be (resolution, resolution)
         crop_scale (float): Multiplier factor to scale tight bounding boxes
+        encoder_codec (str) Encoder codec code
     """
-    def __init__(self, display=False, verbose=0, verbose_size=None, output_crop=False, resolution=256, crop_scale=1.2):
+    def __init__(self, display=False, verbose=0, verbose_size=None, output_crop=False, resolution=256, crop_scale=1.2,
+                 encoder_codec='avc1'):
         super(VideoRenderer, self).__init__()
         self._display = display
         self._verbose = verbose
@@ -32,7 +34,7 @@ class VideoRenderer(mp.Process):
         self._running = True
         self._input_queue = mp.Queue()
         self._reply_queue = mp.Queue()
-        self._fourcc = cv2.VideoWriter_fourcc(*'avc1')
+        self._fourcc = cv2.VideoWriter_fourcc(*'encoder_codec')
         self._in_vid = None
         self._out_vid = None
         self._seq = None

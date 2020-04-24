@@ -46,6 +46,8 @@ general.add_argument('-d', '--display', action='store_true',
                      help='display the rendering')
 general.add_argument('-v', '--verbose', default=0, type=int, metavar='N',
                      help='verbose level')
+general.add_argument('-ec', '--encoder_codec', default='avc1', metavar='STR',
+                     help='encoder codec code')
 
 detection = base_parser.add_argument_group('detection')
 detection.add_argument('-dm', '--detection_model', metavar='PATH', default='../weights/WIDERFace_DSFD_RES152.pth',
@@ -124,7 +126,7 @@ d = parser.get_default
 
 class VideoProcessBase(object):
     def __init__(self, resolution=d('resolution'), crop_scale=d('crop_scale'), gpus=d('gpus'),
-         cpu_only=d('cpu_only'), display=d('display'), verbose=d('verbose'),
+         cpu_only=d('cpu_only'), display=d('display'), verbose=d('verbose'), encoder_codec=d('encoder_codec'),
          # Detection arguments:
          detection_model=d('detection_model'), det_batch_size=d('det_batch_size'), det_postfix=d('det_postfix'),
          # Sequence arguments:
@@ -213,7 +215,7 @@ class VideoProcessBase(object):
             self.smooth_seg = None
 
         # Initialize output videos format
-        self.fourcc = cv2.VideoWriter_fourcc(*'avc1')
+        self.fourcc = cv2.VideoWriter_fourcc(*encoder_codec)
 
     def process_pose(self, input_path, output_dir, seq_file_path):
         if not self.cache_pose:
@@ -538,4 +540,3 @@ def main(input, output=d('output'), resolution=d('resolution'), crop_scale=d('cr
 
 if __name__ == "__main__":
     main(**vars(parser.parse_args()))
-

@@ -72,7 +72,7 @@ d = parser.get_default
 
 class FaceReenactment(VideoProcessBase):
     def __init__(self, resolution=d('resolution'), crop_scale=d('crop_scale'), gpus=d('gpus'),
-        cpu_only=d('cpu_only'), display=d('display'), verbose=d('verbose'),
+        cpu_only=d('cpu_only'), display=d('display'), verbose=d('verbose'), encoder_codec=d('encoder_codec'),
         # Detection arguments:
         detection_model=d('detection_model'), det_batch_size=d('det_batch_size'), det_postfix=d('det_postfix'),
         # Sequence arguments:
@@ -97,7 +97,7 @@ class FaceReenactment(VideoProcessBase):
         batch_size=d('batch_size'), reenactment_model=d('reenactment_model'), criterion_id=d('criterion_id'),
         min_radius=d('min_radius')):
         super(FaceReenactment, self).__init__(
-            resolution, crop_scale, gpus, cpu_only, display, verbose,
+            resolution, crop_scale, gpus, cpu_only, display, verbose, encoder_codec,
             detection_model=detection_model, det_batch_size=det_batch_size, det_postfix=det_postfix,
             iou_thresh=iou_thresh, min_length=min_length, min_size=min_size, center_kernel=center_kernel,
             size_kernel=size_kernel, smooth_det=smooth_det, seq_postfix=seq_postfix, write_empty=write_empty,
@@ -138,7 +138,7 @@ class FaceReenactment(VideoProcessBase):
 
         # Initialize video renderer
         self.video_renderer = FaceReenactmentRenderer(self.display, self.verbose, True, self.resolution,
-                                                      self.crop_scale)
+                                                      self.crop_scale, encoder_codec)
         self.video_renderer.start()
 
     def __del__(self):
@@ -308,7 +308,8 @@ class FaceReenactment(VideoProcessBase):
 
 
 class FaceReenactmentRenderer(VideoRenderer):
-    def __init__(self, display=False, verbose=0, output_crop=False, resolution=256, crop_scale=1.2):
+    def __init__(self, display=False, verbose=0, output_crop=False, resolution=256, crop_scale=1.2,
+                 encoder_codec='avc1'):
         self._appearance_map = None
         self._fig = None
         self._figsize = (24, 16)
@@ -324,7 +325,7 @@ class FaceReenactmentRenderer(VideoRenderer):
             verbose_size = (self._appearance_map_size[0] + resolution, self._appearance_map_size[1])
 
         super(FaceReenactmentRenderer, self).__init__(display, verbose, verbose_size, output_crop, resolution,
-                                                      crop_scale)
+                                                      crop_scale, encoder_codec)
 
     def on_render(self, *args):
         if self._verbose <= 0:

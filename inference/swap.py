@@ -81,7 +81,7 @@ d = parser.get_default
 
 class FaceSwapping(VideoProcessBase):
     def __init__(self, resolution=d('resolution'), crop_scale=d('crop_scale'), gpus=d('gpus'),
-        cpu_only=d('cpu_only'), display=d('display'), verbose=d('verbose'),
+        cpu_only=d('cpu_only'), display=d('display'), verbose=d('verbose'), encoder_codec=d('encoder_codec'),
         # Detection arguments:
         detection_model=d('detection_model'), det_batch_size=d('det_batch_size'), det_postfix=d('det_postfix'),
         # Sequence arguments:
@@ -157,7 +157,7 @@ class FaceSwapping(VideoProcessBase):
 
         # Initialize video writer
         self.video_renderer = FaceSwappingRenderer(self.display, self.verbose, self.output_crop, self.resolution,
-                                                   self.crop_scale)
+                                                   self.crop_scale, encoder_codec)
         self.video_renderer.start()
 
     def __del__(self):
@@ -358,7 +358,8 @@ class FaceSwapping(VideoProcessBase):
 
 
 class FaceSwappingRenderer(VideoRenderer):
-    def __init__(self, display=False, verbose=0, output_crop=False, resolution=256, crop_scale=1.2):
+    def __init__(self, display=False, verbose=0, output_crop=False, resolution=256, crop_scale=1.2,
+                 encoder_codec='avc1'):
         self._appearance_map = None
         self._fig = None
         self._figsize = (24, 16)
@@ -373,7 +374,8 @@ class FaceSwappingRenderer(VideoRenderer):
             self._appearance_map_size = (int(np.round(height * fig_ratio)), height)
             verbose_size = (self._appearance_map_size[0] + resolution * 2, self._appearance_map_size[1])
 
-        super(FaceSwappingRenderer, self).__init__(display, verbose, verbose_size, output_crop, resolution, crop_scale)
+        super(FaceSwappingRenderer, self).__init__(display, verbose, verbose_size, output_crop, resolution, crop_scale,
+                                                   encoder_codec)
 
     def on_render(self, *args):
         if self._verbose <= 0:
