@@ -215,6 +215,7 @@ class VideoProcessBase(object):
             self.smooth_seg = None
 
         # Initialize output videos format
+        self.encoder_codec = encoder_codec
         self.fourcc = cv2.VideoWriter_fourcc(*encoder_codec)
 
     def process_pose(self, input_path, output_dir, seq_file_path):
@@ -453,7 +454,8 @@ class VideoProcessBase(object):
         if not os.path.isfile(first_cropped_path):
             if is_vid:
                 crop_video_sequences_main(input_path, output_dir, seq_file_path, self.seq_postfix, self.resolution,
-                                          self.crop_scale, select='all', disable_tqdm=False)
+                                          self.crop_scale, select='all', disable_tqdm=False,
+                                          encoder_codec=self.encoder_codec)
             else:
                 crop_image_sequences_main(input_path, output_dir, seq_file_path, self.seq_postfix, '.jpg',
                                           self.resolution, self.crop_scale)
