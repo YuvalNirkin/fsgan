@@ -506,7 +506,7 @@ def smooth_poses(poses, kernel_size=5):
 
 
 def main(input, output=d('output'), resolution=d('resolution'), crop_scale=d('crop_scale'), gpus=d('gpus'),
-         cpu_only=d('cpu_only'), display=d('display'), verbose=d('verbose'),
+         cpu_only=d('cpu_only'), display=d('display'), verbose=d('verbose'), encoder_codec=d('encoder_codec'),
          # Detection arguments:
          detection_model=d('detection_model'), det_batch_size=d('det_batch_size'), det_postfix=d('det_postfix'),
          # Sequence arguments:
@@ -524,7 +524,7 @@ def main(input, output=d('output'), resolution=d('resolution'), crop_scale=d('cr
          cache_segmentation=d('cache_segmentation'), smooth_segmentation=d('smooth_segmentation'),
          seg_remove_mouth=d('seg_remove_mouth')):
     video_process = VideoProcessCallable(
-        resolution, crop_scale, gpus, cpu_only, display, verbose,
+        resolution, crop_scale, gpus, cpu_only, display, verbose, encoder_codec,
         detection_model=detection_model, det_batch_size=det_batch_size, det_postfix=det_postfix,
         iou_thresh=iou_thresh, min_length=min_length, min_size=min_size, center_kernel=center_kernel,
         size_kernel=size_kernel, smooth_det=smooth_det, seq_postfix=seq_postfix, write_empty=write_empty,
