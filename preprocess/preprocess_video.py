@@ -9,6 +9,7 @@ segmentation masks will be computed and cached.
 
 import os
 import argparse
+import sys
 import pickle
 from tqdm import tqdm
 import numpy as np
@@ -248,7 +249,7 @@ class VideoProcessBase(object):
 
             # For each batch of frames in the input video
             seq_poses = []
-            for i, frame in enumerate(tqdm(in_vid_loader, unit='batches')):
+            for i, frame in enumerate(tqdm(in_vid_loader, unit='batches', file=sys.stdout)):
                 frame = frame.to(self.device)
                 poses = self.face_pose(frame).div_(99.)  # Yaw, Pitch, Roll
                 seq_poses.append(poses.cpu().numpy())
@@ -326,7 +327,7 @@ class VideoProcessBase(object):
 
             # For each batch of frames in the input video
             seq_landmarks = []
-            for i, frame in enumerate(tqdm(in_vid_loader, unit='batches')):
+            for i, frame in enumerate(tqdm(in_vid_loader, unit='batches', file=sys.stdout)):
                 frame = frame.to(self.device)
                 H = self.L(frame)
                 landmarks = self.heatmap_encoder(H)
@@ -371,7 +372,7 @@ class VideoProcessBase(object):
                                        drop_last=False, shuffle=False)
 
             # For each batch of frames in the input video
-            pbar = tqdm(in_vid_loader, unit='batches')
+            pbar = tqdm(in_vid_loader, unit='batches', file=sys.stdout)
             prev_segmentation = None
             r = self.smooth_seg.kernel_radius
             encoded_segmentations = []

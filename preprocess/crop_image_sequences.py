@@ -1,6 +1,5 @@
 import os
 import pickle
-from tqdm import tqdm
 import numpy as np
 import cv2
 from fsgan.utils.bbox_utils import scale_bbox, crop_img

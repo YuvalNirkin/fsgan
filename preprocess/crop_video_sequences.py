@@ -1,4 +1,5 @@
 import os
+import sys
 import pickle
 from tqdm import tqdm
 import numpy as np
@@ -56,7 +57,7 @@ def main(input_path, output_dir=None, cache_path=None, seq_postfix='_dsfd_seq.pk
     # For each frame in the target video
     cropped_detections = [[] for seq in seq_list]
     cropped_landmarks = [[] for seq in seq_list]
-    pbar = range(total_frames) if disable_tqdm else tqdm(range(total_frames))
+    pbar = range(total_frames) if disable_tqdm else tqdm(range(total_frames), file=sys.stdout)
     for i in pbar:
         ret, frame = cap.read()
         if frame is None:

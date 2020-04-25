@@ -167,7 +167,7 @@ class FaceReenactment(VideoProcessBase):
         optimizer = optim.Adam(self.Gr.parameters(), lr=self.finetune_lr, betas=(0.5, 0.999))
 
         # For each batch in the training data
-        for i, (img, landmarks) in enumerate(tqdm(train_loader, unit='batches')):
+        for i, (img, landmarks) in enumerate(tqdm(train_loader, unit='batches', file=sys.stdout)):
             # Prepare input
             with torch.no_grad():
                 # For each view images and landmarks
