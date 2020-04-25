@@ -36,7 +36,8 @@ For accessing FSGAN's pretrained models and auxiliary data, please fill out
 We will then send you a link to FSGAN's shared directory and download script.
 
 ## Inference
-- [Face swapping](https://github.com/YuvalNirkin/fsgan/wiki/Face-Swapping-Inference)
+- [Face swapping guide](https://github.com/YuvalNirkin/fsgan/wiki/Face-Swapping-Inference)
+- [Face swapping Google Colab](inference/face_swapping.ipynb)
 
 ## Training
 TBD
