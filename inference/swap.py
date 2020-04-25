@@ -107,7 +107,7 @@ class FaceSwapping(VideoProcessBase):
         blending_model=d('blending_model'), criterion_id=d('criterion_id'), min_radius=d('min_radius'),
         output_crop=d('output_crop')):
         super(FaceSwapping, self).__init__(
-            resolution, crop_scale, gpus, cpu_only, display, verbose,
+            resolution, crop_scale, gpus, cpu_only, display, verbose, encoder_codec,
             detection_model=detection_model, det_batch_size=det_batch_size, det_postfix=det_postfix,
             iou_thresh=iou_thresh, min_length=min_length, min_size=min_size, center_kernel=center_kernel,
             size_kernel=size_kernel, smooth_det=smooth_det, seq_postfix=seq_postfix, write_empty=write_empty,
