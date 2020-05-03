@@ -489,6 +489,7 @@ class RandomRotation(RecursiveTransform):
         if angle is None or self.randomize_per_image:
             angle = (random.random() * 2.0 - 1.0) * self.max_degrees
         if isinstance(x, (list, tuple)):
+            x = list(x) if isinstance(x, tuple) else x
             for i in range(len(x)):
                 if is_img(x[i]):
                     angle = (random.random() * 2.0 - 1.0) * self.max_degrees if self.randomize_per_image else angle
