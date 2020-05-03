@@ -38,6 +38,7 @@ We will then send you a link to FSGAN's shared directory and download script.
 ## Inference
 - [Face swapping guide](https://github.com/YuvalNirkin/fsgan/wiki/Face-Swapping-Inference)
 - [Face swapping Google Colab](inference/face_swapping.ipynb)
+- [Paper models guide](https://github.com/YuvalNirkin/fsgan/wiki/Paper-Models-Inference)
 
 ## Training
 TBD
