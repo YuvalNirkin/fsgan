@@ -255,9 +255,9 @@ class VideoProcessBase(object):
                 seq_poses.append(poses.cpu().numpy())
             seq_poses = np.concatenate(seq_poses)
 
-            # Save landmarks to file
-            seq_landmarks_smoothed = smooth_poses(seq_poses, self.smooth_poses)
-            np.savez_compressed(curr_pose_path, poses=seq_poses, poses_smoothed=seq_landmarks_smoothed)
+            # Save poses to file
+            seq_poses_smoothed = smooth_poses(seq_poses, self.smooth_poses)
+            np.savez_compressed(curr_pose_path, poses=seq_poses, poses_smoothed=seq_poses_smoothed)
 
     def extract_frontal_images(self, input_path, output_dir, seq_file_path, out_postfix='.jpg', resolution=None):
         if not self.cache_frontal:
