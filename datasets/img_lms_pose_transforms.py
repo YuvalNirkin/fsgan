@@ -203,9 +203,13 @@ class Resize(RecursiveTransform):
             numpy.ndarray or list of numpy.ndarray: Transformed images or poses
         """
         interpolation = self.interpolation_id if interpolation is None else interpolation
-        if isinstance(interpolation, list) and isinstance(x, (list, tuple)) and len(x) == len(interpolation):
-            return [self.__call__(a, interpolation[i]) for i, a in enumerate(x)]
-        elif is_img(x):   # x is an image
+        if isinstance(x, (list, tuple)):
+            if isinstance(interpolation, list):
+                assert len(x) == len(interpolation)
+                return [self.__call__(a, interpolation[i]) for i, a in enumerate(x)]
+            else:
+                return [self.__call__(a, interpolation) for a in x]
+        elif is_img(x):  # x is an image
             interpolation = interpolation[0] if isinstance(interpolation, list) else interpolation
             x = cv2.resize(x, (self.size[1], self.size[0]), interpolation=interpolation)
 
