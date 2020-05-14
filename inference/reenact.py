@@ -53,6 +53,8 @@ parser.add_argument('-ci', '--criterion_id', default="vgg_loss.VGGLoss('../weigh
                     metavar='OBJ', help='id criterion object')
 parser.add_argument('-mr', '--min_radius', default=2.0, type=float, metavar='F',
                     help='minimum distance between points in the appearance map')
+parser.add_argument('-rp', '--renderer_process', action='store_true',
+                    help='If True, the renderer will be run in a separate process')
 
 finetune = parser.add_argument_group('finetune')
 finetune.add_argument('-f', '--finetune', action='store_true',
@@ -95,7 +97,7 @@ class FaceReenactment(VideoProcessBase):
         finetune_save=d('finetune_save'),
         # Reenactment arguments:
         batch_size=d('batch_size'), reenactment_model=d('reenactment_model'), criterion_id=d('criterion_id'),
-        min_radius=d('min_radius')):
+        min_radius=d('min_radius'), renderer_process=d('renderer_process')):
         super(FaceReenactment, self).__init__(
             resolution, crop_scale, gpus, cpu_only, display, verbose, encoder_codec,
             detection_model=detection_model, det_batch_size=det_batch_size, det_postfix=det_postfix,
@@ -138,7 +140,7 @@ class FaceReenactment(VideoProcessBase):
 
         # Initialize video renderer
         self.video_renderer = FaceReenactmentRenderer(self.display, self.verbose, True, self.resolution,
-                                                      self.crop_scale, encoder_codec)
+                                                      self.crop_scale, encoder_codec, renderer_process)
         self.video_renderer.start()
 
     def __del__(self):
@@ -304,12 +306,13 @@ class FaceReenactment(VideoProcessBase):
                 self.Gr.load_state_dict(self.reenactment_state_dict)
 
         # Wait for the video render to finish rendering
+        self.video_renderer.finalize()
         self.video_renderer.wait_until_finished()
 
 
 class FaceReenactmentRenderer(VideoRenderer):
     def __init__(self, display=False, verbose=0, output_crop=False, resolution=256, crop_scale=1.2,
-                 encoder_codec='avc1'):
+                 encoder_codec='avc1', separate_process=False):
         self._appearance_map = None
         self._fig = None
         self._figsize = (24, 16)
@@ -325,7 +328,7 @@ class FaceReenactmentRenderer(VideoRenderer):
             verbose_size = (self._appearance_map_size[0] + resolution, self._appearance_map_size[1])
 
         super(FaceReenactmentRenderer, self).__init__(display, verbose, verbose_size, output_crop, resolution,
-                                                      crop_scale, encoder_codec)
+                                                      crop_scale, encoder_codec, separate_process)
 
     def on_render(self, *args):
         if self._verbose <= 0:
@@ -414,7 +417,7 @@ def main(source, target, output=None, select_source=d('select_source'), select_t
          finetune_save=d('finetune_save'),
          # Reenactment arguments:
          batch_size=d('batch_size'), reenactment_model=d('reenactment_model'), criterion_id=d('criterion_id'),
-         min_radius=d('min_radius')):
+         min_radius=d('min_radius'), renderer_process=d('renderer_process')):
     face_reenactment = FaceReenactment(
         resolution, crop_scale, gpus, cpu_only, display, verbose, encoder_codec,
         detection_model=detection_model, det_batch_size=det_batch_size, det_postfix=det_postfix,
@@ -429,7 +432,8 @@ def main(source, target, output=None, select_source=d('select_source'), select_t
         seg_remove_mouth=seg_remove_mouth,
         finetune=finetune, finetune_iterations=finetune_iterations, finetune_lr=finetune_lr,
         finetune_batch_size=finetune_batch_size, finetune_workers=finetune_workers, finetune_save=finetune_save,
-        batch_size=batch_size, reenactment_model=reenactment_model, criterion_id=criterion_id, min_radius=min_radius)
+        batch_size=batch_size, reenactment_model=reenactment_model, criterion_id=criterion_id, min_radius=min_radius,
+        renderer_process=renderer_process)
     if len(source) == 1 and len(target) == 1 and os.path.isfile(source[0]) and os.path.isfile(target[0]):
         face_reenactment(source[0], target[0], output, select_source, select_target)
     else:

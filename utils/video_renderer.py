@@ -20,10 +20,11 @@ class VideoRenderer(mp.Process):
             verbose level zero
         resolution (int): Determines the size of cropped frames to be (resolution, resolution)
         crop_scale (float): Multiplier factor to scale tight bounding boxes
-        encoder_codec (str) Encoder codec code
+        encoder_codec (str): Encoder codec code
+        separate_process (bool): If True, the renderer will be run in a separate process
     """
     def __init__(self, display=False, verbose=0, verbose_size=None, output_crop=False, resolution=256, crop_scale=1.2,
-                 encoder_codec='avc1'):
+                 encoder_codec='avc1', separate_process=False):
         super(VideoRenderer, self).__init__()
         self._display = display
         self._verbose = verbose
@@ -35,6 +36,7 @@ class VideoRenderer(mp.Process):
         self._input_queue = mp.Queue()
         self._reply_queue = mp.Queue()
         self._fourcc = cv2.VideoWriter_fourcc(*encoder_codec)
+        self._separate_process = separate_process
         self._in_vid = None
         self._out_vid = None
         self._seq = None
@@ -52,7 +54,10 @@ class VideoRenderer(mp.Process):
             **kwargs (dict): Additional keyword arguments that will be added as members of the class. This allows
                 inheriting classes to access those arguments from the new process
         """
-        self._input_queue.put([in_vid_path, seq, out_vid_path, kwargs])
+        if self._separate_process:
+            self._input_queue.put([in_vid_path, seq, out_vid_path, kwargs])
+        else:
+            self._init_task(in_vid_path, seq, out_vid_path, kwargs)
 
     def write(self, *args):
         """ Add tensors for rendering.
@@ -60,11 +65,23 @@ class VideoRenderer(mp.Process):
         Args:
             *args (tuple of torch.Tensor): The tensors for rendering
         """
-        self._input_queue.put([a.cpu() for a in args])
+        if self._separate_process:
+            self._input_queue.put([a.cpu() for a in args])
+        else:
+            self._write_batch([a.cpu() for a in args])
+
+    def finalize(self):
+        if self._separate_process:
+            self._input_queue.put(True)
+        else:
+            self._finalize_task()
 
     def wait_until_finished(self):
         """ Wait for the video renderer to finish the current video rendering job. """
-        return self._reply_queue.get()
+        if self._separate_process:
+            return self._reply_queue.get()
+        else:
+            return True
 
     def on_render(self, *args):
         """ Given the input tensors this method produces a cropped rendered image.
@@ -81,6 +98,14 @@ class VideoRenderer(mp.Process):
         """
         return tensor2bgr(args[0])
 
+    def start(self):
+        if self._separate_process:
+            super(VideoRenderer, self).start()
+
+    def kill(self):
+        if self._separate_process:
+            super(VideoRenderer, self).kill()
+
     def run(self):
         """ Main processing loop. Intended to be executed on a separate process. """
         while self._running:
@@ -88,92 +113,19 @@ class VideoRenderer(mp.Process):
 
             # Initialize new video rendering task
             if self._in_vid is None:
-                self._in_vid_path, self._seq, out_vid_path = task[:3]
-                additional_attributes = task[3]
-                self._frame_count = 0
-
-                # Add additional arguments as members
-                for attr_name, attr_val in additional_attributes.items():
-                    setattr(self, attr_name, attr_val)
-
-                # Open input video
-                self._in_vid = cv2.VideoCapture(self._in_vid_path)
-                assert self._in_vid.isOpened(), f'Failed to open video: "{self._in_vid_path}"'
-
-                in_total_frames = int(self._in_vid.get(cv2.CAP_PROP_FRAME_COUNT))
-                fps = self._in_vid.get(cv2.CAP_PROP_FPS)
-                in_vid_width = int(self._in_vid.get(cv2.CAP_PROP_FRAME_WIDTH))
-                in_vid_height = int(self._in_vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                self._total_frames = in_total_frames if self._verbose == 0 else len(self._seq)
-                # print(f'Debug: initializing video: "{self._in_vid_path}", total_frames={self._total_frames}')
-
-                # Initialize output video
-                if out_vid_path is not None:
-                    out_size = (in_vid_width, in_vid_height)
-                    if self._verbose <= 0 and self._output_crop:
-                        out_size = (self._resolution, self._resolution)
-                    elif self._verbose_size is not None:
-                        out_size = self._verbose_size
-                    self._out_vid = cv2.VideoWriter(out_vid_path, self._fourcc, fps, out_size)
-
-                # Write frames as they are until the start of the sequence
-                if self._verbose == 0:
-                    for i in range(self._seq.start_index):
-                        # Read frame
-                        ret, frame_bgr = self._in_vid.read()
-                        assert frame_bgr is not None, f'Failed to read frame {i} from input video: "{self._in_vid_path}"'
-                        self._render(frame_bgr)
-                        self._frame_count += 1
-
+                self._init_task(*task[:3], task[3])
                 continue
 
-            # Write a batch of frames
-            tensors = task
-            batch_size = tensors[0].shape[0]
-
-            # For each frame in the current batch of tensors
-            for b in range(batch_size):
-                # Handle full frames if output_crop was not specified
-                full_frame_bgr, bbox = None, None
-                if self._verbose == 0 and not self._output_crop:
-                    # Read frame from input video
-                    ret, full_frame_bgr = self._in_vid.read()
-                    assert full_frame_bgr is not None, \
-                        f'Failed to read frame {i} from input video: "{self._in_vid_path}"'
-
-                    # Get bounding box from sequence
-                    det = self._seq[self._frame_count - self._seq.start_index]
-                    bbox = np.concatenate((det[:2], det[2:] - det[:2]))
-                    bbox = scale_bbox(bbox, self._crop_scale)
-
-                render_bgr = self.on_render(*[t[b] for t in tensors])
-                self._render(render_bgr, full_frame_bgr, bbox)
-                self._frame_count += 1
-                # print(f'Debug: Writing frame: {self._frame_count}')
-
-            # Check if we reached the end of the sequence
-            if self._verbose == 0 and self._frame_count >= (self._seq.start_index + len(self._seq)):
-                for i in range(self._seq.start_index + len(self._seq), self._total_frames):
-                    # Read frame
-                    ret, frame_bgr = self._in_vid.read()
-                    assert frame_bgr is not None, f'Failed to read frame {i} from input video: "{self._in_vid_path}"'
-                    self._render(frame_bgr)
-                    self._frame_count += 1
-
-            # Check if all frames have been processed
-            if self._frame_count >= self._total_frames:
-                # Clean up
-                self._in_vid.release()
-                self._out_vid.release()
-                self._in_vid = None
-                self._out_vid = None
-                self._seq = None
-                self._in_vid_path = None
-                self._total_frames = None
-                self._frame_count = 0
+            # Finalize task
+            if isinstance(task, bool):
+                self._finalize_task()
 
                 # Notify job is finished
                 self._reply_queue.put(True)
+                continue
+
+            # Write a batch of frames
+            self._write_batch(task)
 
     def _render(self, render_bgr, full_frame_bgr=None, bbox=None):
         if self._verbose == 0 and not self._output_crop and full_frame_bgr is not None:
@@ -184,3 +136,85 @@ class VideoRenderer(mp.Process):
             cv2.imshow('render', render_bgr)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self._running = False
+
+    def _init_task(self, in_vid_path, seq, out_vid_path, additional_attributes):
+        # print('_init_task start')
+        self._in_vid_path, self._seq = in_vid_path, seq
+        self._frame_count = 0
+
+        # Add additional arguments as members
+        for attr_name, attr_val in additional_attributes.items():
+            setattr(self, attr_name, attr_val)
+
+        # Open input video
+        self._in_vid = cv2.VideoCapture(self._in_vid_path)
+        assert self._in_vid.isOpened(), f'Failed to open video: "{self._in_vid_path}"'
+
+        in_total_frames = int(self._in_vid.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = self._in_vid.get(cv2.CAP_PROP_FPS)
+        in_vid_width = int(self._in_vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+        in_vid_height = int(self._in_vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self._total_frames = in_total_frames if self._verbose == 0 else len(self._seq)
+        # print(f'Debug: initializing video: "{self._in_vid_path}", total_frames={self._total_frames}')
+
+        # Initialize output video
+        if out_vid_path is not None:
+            out_size = (in_vid_width, in_vid_height)
+            if self._verbose <= 0 and self._output_crop:
+                out_size = (self._resolution, self._resolution)
+            elif self._verbose_size is not None:
+                out_size = self._verbose_size
+            self._out_vid = cv2.VideoWriter(out_vid_path, self._fourcc, fps, out_size)
+
+        # Write frames as they are until the start of the sequence
+        if self._verbose == 0:
+            for i in range(self._seq.start_index):
+                # Read frame
+                ret, frame_bgr = self._in_vid.read()
+                assert frame_bgr is not None, f'Failed to read frame {i} from input video: "{self._in_vid_path}"'
+                self._render(frame_bgr)
+                self._frame_count += 1
+
+    def _write_batch(self, tensors):
+        batch_size = tensors[0].shape[0]
+
+        # For each frame in the current batch of tensors
+        for b in range(batch_size):
+            # Handle full frames if output_crop was not specified
+            full_frame_bgr, bbox = None, None
+            if self._verbose == 0 and not self._output_crop:
+                # Read frame from input video
+                ret, full_frame_bgr = self._in_vid.read()
+                assert full_frame_bgr is not None, \
+                    f'Failed to read frame {self._frame_count} from input video: "{self._in_vid_path}"'
+
+                # Get bounding box from sequence
+                det = self._seq[self._frame_count - self._seq.start_index]
+                bbox = np.concatenate((det[:2], det[2:] - det[:2]))
+                bbox = scale_bbox(bbox, self._crop_scale)
+
+            render_bgr = self.on_render(*[t[b] for t in tensors])
+            self._render(render_bgr, full_frame_bgr, bbox)
+            self._frame_count += 1
+            # print(f'Debug: Wrote frame: {self._frame_count}')
+
+    def _finalize_task(self):
+        if self._verbose == 0 and self._frame_count >= (self._seq.start_index + len(self._seq)):
+            for i in range(self._seq.start_index + len(self._seq), self._total_frames):
+                # Read frame
+                ret, frame_bgr = self._in_vid.read()
+                assert frame_bgr is not None, f'Failed to read frame {i} from input video: "{self._in_vid_path}"'
+                self._render(frame_bgr)
+                self._frame_count += 1
+                # print(f'Debug: Wrote frame: {self._frame_count}')
+
+        # if self._frame_count >= self._total_frames:
+        # Clean up
+        self._in_vid.release()
+        self._out_vid.release()
+        self._in_vid = None
+        self._out_vid = None
+        self._seq = None
+        self._in_vid_path = None
+        self._total_frames = None
+        self._frame_count = 0

@@ -62,6 +62,8 @@ parser.add_argument('-mr', '--min_radius', default=2.0, type=float, metavar='F',
                     help='minimum distance between points in the appearance map')
 parser.add_argument('-oc', '--output_crop', action='store_true',
                     help='output crop around the face instead of full frame')
+parser.add_argument('-rp', '--renderer_process', action='store_true',
+                    help='If True, the renderer will be run in a separate process')
 
 finetune = parser.add_argument_group('finetune')
 finetune.add_argument('-f', '--finetune', action='store_true',
@@ -105,7 +107,7 @@ class FaceSwapping(VideoProcessBase):
         # Swapping arguments:
         batch_size=d('batch_size'), reenactment_model=d('reenactment_model'), completion_model=d('completion_model'),
         blending_model=d('blending_model'), criterion_id=d('criterion_id'), min_radius=d('min_radius'),
-        output_crop=d('output_crop')):
+        output_crop=d('output_crop'), renderer_process=d('renderer_process')):
         super(FaceSwapping, self).__init__(
             resolution, crop_scale, gpus, cpu_only, display, verbose, encoder_codec,
             detection_model=detection_model, det_batch_size=det_batch_size, det_postfix=det_postfix,
@@ -157,7 +159,7 @@ class FaceSwapping(VideoProcessBase):
 
         # Initialize video writer
         self.video_renderer = FaceSwappingRenderer(self.display, self.verbose, self.output_crop, self.resolution,
-                                                   self.crop_scale, encoder_codec)
+                                                   self.crop_scale, encoder_codec, renderer_process)
         self.video_renderer.start()
 
     def __del__(self):
@@ -353,13 +355,14 @@ class FaceSwapping(VideoProcessBase):
             else:
                 self.Gr.load_state_dict(self.reenactment_state_dict)
 
-        # Wait for the video writer to finish writing
+        # Finalize video and wait for the video writer to finish writing
+        self.video_renderer.finalize()
         self.video_renderer.wait_until_finished()
 
 
 class FaceSwappingRenderer(VideoRenderer):
     def __init__(self, display=False, verbose=0, output_crop=False, resolution=256, crop_scale=1.2,
-                 encoder_codec='avc1'):
+                 encoder_codec='avc1', separate_process=False):
         self._appearance_map = None
         self._fig = None
         self._figsize = (24, 16)
@@ -375,7 +378,7 @@ class FaceSwappingRenderer(VideoRenderer):
             verbose_size = (self._appearance_map_size[0] + resolution * 2, self._appearance_map_size[1])
 
         super(FaceSwappingRenderer, self).__init__(display, verbose, verbose_size, output_crop, resolution, crop_scale,
-                                                   encoder_codec)
+                                                   encoder_codec, separate_process)
 
     def on_render(self, *args):
         if self._verbose <= 0:
@@ -473,7 +476,7 @@ def main(source, target, output=None, select_source=d('select_source'), select_t
          # Swapping arguments:
          batch_size=d('batch_size'), reenactment_model=d('reenactment_model'), completion_model=d('completion_model'),
          blending_model=d('blending_model'), criterion_id=d('criterion_id'), min_radius=d('min_radius'),
-         output_crop=d('output_crop')):
+         output_crop=d('output_crop'), renderer_process=d('renderer_process')):
     face_swapping = FaceSwapping(
         resolution, crop_scale, gpus, cpu_only, display, verbose, encoder_codec,
         detection_model=detection_model, det_batch_size=det_batch_size, det_postfix=det_postfix,
@@ -489,7 +492,8 @@ def main(source, target, output=None, select_source=d('select_source'), select_t
         finetune=finetune, finetune_iterations=finetune_iterations, finetune_lr=finetune_lr,
         finetune_batch_size=finetune_batch_size, finetune_workers=finetune_workers, finetune_save=finetune_save,
         batch_size=batch_size, reenactment_model=reenactment_model, completion_model=completion_model,
-        blending_model=blending_model, criterion_id=criterion_id, min_radius=min_radius, output_crop=output_crop)
+        blending_model=blending_model, criterion_id=criterion_id, min_radius=min_radius, output_crop=output_crop,
+        renderer_process=renderer_process)
     if len(source) == 1 and len(target) == 1 and os.path.isfile(source[0]) and os.path.isfile(target[0]):
         face_swapping(source[0], target[0], output, select_source, select_target)
     else:
