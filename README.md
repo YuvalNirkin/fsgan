@@ -46,7 +46,7 @@ TBD
 ## Citation
 ```
 @inproceedings{nirkin2019fsgan,
-  title={Fsgan: Subject agnostic face swapping and reenactment},
+  title={{FSGAN}: Subject agnostic face swapping and reenactment},
   author={Nirkin, Yuval and Keller, Yosi and Hassner, Tal},
   booktitle={Proceedings of the IEEE International Conference on Computer Vision},
   pages={7184--7193},
