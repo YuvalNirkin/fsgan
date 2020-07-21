@@ -40,4 +40,3 @@ if __name__ == '__main__':
          batch_size=batch_size, workers=workers, optimizer=optimizer, scheduler=scheduler, pretrained=pretrained,
          criterion=criterion, model=model)
 
-    os.system('sudo shutdown')

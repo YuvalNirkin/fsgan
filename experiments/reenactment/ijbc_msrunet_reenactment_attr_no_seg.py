@@ -51,4 +51,3 @@ if __name__ == '__main__':
          generator=generator, discriminator=discriminator, lms_model=lms_model,
          rec_weight=rec_weight, gan_weight=gan_weight)
 
-    os.system('sudo shutdown')
