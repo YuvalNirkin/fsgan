@@ -10,7 +10,6 @@ import torch.utils.data as data
 from fsgan.utils.seg_utils import decode_binary_mask
 from fsgan.utils.video_utils import get_video_info
 
-
 def fuse_clusters(points, r=0.5):
     """ Select a single point from each cluster of points.
 
@@ -41,7 +40,6 @@ def fuse_clusters(points, r=0.5):
             keep[j] = False
 
     return np.nonzero(keep)[0]
-
 
 class AppearanceMapDataset(data.Dataset):
     """A dataset representing the appearance map of a video sequence
