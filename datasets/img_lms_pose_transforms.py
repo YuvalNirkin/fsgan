@@ -163,7 +163,7 @@ class Crop(RecursiveTransform):
             numpy.ndarray or list of numpy.ndarray: Transformed images or poses
         """
         if isinstance(x, (list, tuple)):
-            if len(x) == 2 and is_img(x) and is_bbox(x):
+            if len(x) == 2 and is_img(x[0]) and is_bbox(x[1]):
                 # Found image and bounding box pair
                 img, bbox = x
                 if self.det_format:
