@@ -41,7 +41,7 @@ We will then send you a link to FSGAN's shared directory and download script.
 - [Paper models guide](https://github.com/YuvalNirkin/fsgan/wiki/Paper-Models-Inference)
 
 ## Training
-TBD
+- [Training V2](https://github.com/YuvalNirkin/fsgan/wiki/Training-V2)
 
 ## Citation
 ```
