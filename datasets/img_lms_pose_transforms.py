@@ -545,6 +545,7 @@ class RandomGaussianBlur(RecursiveTransform):
                f'randomize_per_image={self.randomize_per_image})'
 
 
+# Adapted from: https://github.com/pytorch/vision/blob/master/torchvision/transforms/transforms.py
 class ColorJitter(RecursiveTransform):
     """Randomly change the brightness, contrast and saturation of an image.
 
@@ -565,10 +566,65 @@ class ColorJitter(RecursiveTransform):
             randomized once per call
     """
     def __init__(self, brightness=0, contrast=0, saturation=0, hue=0, randomize_per_image=False):
-        self._transform = transforms.ColorJitter(brightness, contrast, saturation, hue)
+        super(ColorJitter, self).__init__()
+        self.brightness = self._check_input(brightness, 'brightness')
+        self.contrast = self._check_input(contrast, 'contrast')
+        self.saturation = self._check_input(saturation, 'saturation')
+        self.hue = self._check_input(hue, 'hue', center=0, bound=(-0.5, 0.5), clip_first_on_zero=False)
         self.randomize_per_image = randomize_per_image
 
-    def __call__(self, x, transform=None):
+    @torch.jit.unused
+    def _check_input(self, value, name, center=1, bound=(0, float('inf')), clip_first_on_zero=True):
+        if isinstance(value, numbers.Number):
+            if value < 0:
+                raise ValueError("If {} is a single number, it must be non negative.".format(name))
+            value = [center - float(value), center + float(value)]
+            if clip_first_on_zero:
+                value[0] = max(value[0], 0.0)
+        elif isinstance(value, (tuple, list)) and len(value) == 2:
+            if not bound[0] <= value[0] <= value[1] <= bound[1]:
+                raise ValueError("{} values should be between {}".format(name, bound))
+        else:
+            raise TypeError("{} should be a single number or a list/tuple with lenght 2.".format(name))
+
+        # if value is 0 or (1., 1.) for brightness/contrast/saturation
+        # or (0., 0.) for hue, do nothing
+        if value[0] == value[1] == center:
+            value = None
+        return value
+
+    @staticmethod
+    def get_params(brightness: Optional[List[float]],
+                   contrast: Optional[List[float]],
+                   saturation: Optional[List[float]],
+                   hue: Optional[List[float]]
+                   ) -> Tuple[torch.Tensor, Optional[float], Optional[float], Optional[float], Optional[float]]:
+        """Get the parameters for the randomized transform to be applied on image.
+
+        Args:
+            brightness (tuple of float (min, max), optional): The range from which the brightness_factor is chosen
+                uniformly. Pass None to turn off the transformation.
+            contrast (tuple of float (min, max), optional): The range from which the contrast_factor is chosen
+                uniformly. Pass None to turn off the transformation.
+            saturation (tuple of float (min, max), optional): The range from which the saturation_factor is chosen
+                uniformly. Pass None to turn off the transformation.
+            hue (tuple of float (min, max), optional): The range from which the hue_factor is chosen uniformly.
+                Pass None to turn off the transformation.
+
+        Returns:
+            tuple: The parameters used to apply the randomized transform
+            along with their random order.
+        """
+        fn_idx = torch.randperm(4)
+
+        b = None if brightness is None else float(torch.empty(1).uniform_(brightness[0], brightness[1]))
+        c = None if contrast is None else float(torch.empty(1).uniform_(contrast[0], contrast[1]))
+        s = None if saturation is None else float(torch.empty(1).uniform_(saturation[0], saturation[1]))
+        h = None if hue is None else float(torch.empty(1).uniform_(hue[0], hue[1]))
+
+        return fn_idx, b, c, s, h
+
+    def __call__(self, x, params=None):
         """
         Args:
             x (numpy.ndarray or list): Image (H x W x C) or pose (3) or bounding box (4)
@@ -576,22 +632,33 @@ class ColorJitter(RecursiveTransform):
         Returns:
             numpy.ndarray or list: Transformed images.
         """
-        if transform is None:
-            transform = self._transform.get_params(self._transform.brightness, self._transform.contrast,
-                                                   self._transform.saturation, self._transform.hue)
+        if params is None:
+            params = self.get_params(self.brightness, self.contrast, self.saturation, self.hue)
+        fn_idx, brightness_factor, contrast_factor, saturation_factor, hue_factor = params
         if is_img(x):     # x is an image
-            return np.array(transform(Image.fromarray(x)))
+            x = Image.fromarray(x)
+            for fn_id in fn_idx:
+                if fn_id == 0 and brightness_factor is not None:
+                    x = F.adjust_brightness(x, brightness_factor)
+                elif fn_id == 1 and contrast_factor is not None:
+                    x = F.adjust_contrast(x, contrast_factor)
+                elif fn_id == 2 and saturation_factor is not None:
+                    x = F.adjust_saturation(x, saturation_factor)
+                elif fn_id == 3 and hue_factor is not None:
+                    x = F.adjust_hue(x, hue_factor)
+
+            return np.array(x)
         elif isinstance(x, (list, tuple)):
-            return [self.__call__(a, None if self.randomize_per_image else transform) for a in x]
+            return [self.__call__(a, None if self.randomize_per_image else params) for a in x]
 
         return x
 
     def __repr__(self):
         format_string = self.__class__.__name__ + '('
-        format_string += 'brightness={0}'.format(self._transform.brightness)
-        format_string += ', contrast={0}'.format(self._transform.contrast)
-        format_string += ', saturation={0}'.format(self._transform.saturation)
-        format_string += ', hue={0}'.format(self._transform.hue)
+        format_string += 'brightness={0}'.format(self.brightness)
+        format_string += ', contrast={0}'.format(self.contrast)
+        format_string += ', saturation={0}'.format(self.saturation)
+        format_string += ', hue={0}'.format(self.hue)
         format_string += ', randomize_per_image={0})'.format(self.randomize_per_image)
         return format_string
 
