@@ -1,7 +1,9 @@
 """ The concept is that any 1D numpy array is considered pose and anything else is considered an image.
 """
+from typing import Tuple, List, Optional
 import collections
 import random
+import numbers
 import numpy as np
 import cv2
 from PIL import Image
