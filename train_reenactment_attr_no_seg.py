@@ -58,7 +58,7 @@ def main(
 
                 # Compute context
                 context = L(img[1][0].sub(context_mean).div(context_std))
-                context = landmarks_utils.filter_context(context)
+                context = landmarks_utils.filter_landmarks(context)
 
                 # Normalize each of the pyramid images
                 for j in range(len(img)):
