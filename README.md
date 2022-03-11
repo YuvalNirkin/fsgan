@@ -52,4 +52,12 @@ We will then send you a link to FSGAN's shared directory and download script.
   pages={7184--7193},
   year={2019}
 }
+
+@inproceedings{nirkin2022fsganv2,
+  title={{FSGANv2}: Improved Subject Agnostic Face Swapping and Reenactment},
+  author={Nirkin, Yuval and Keller, Yosi and Hassner, Tal},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2022},
+  publisher={IEEE}
+}
 ```
