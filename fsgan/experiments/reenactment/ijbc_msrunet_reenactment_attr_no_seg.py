@@ -29,8 +29,8 @@ if __name__ == '__main__':
     batch_size = [32, 16]
     workers = 32
     pretrained = False
-    criterion_id = VGGLoss('../../weights/vggface2_vgg19_256_1_2_id.pth')
-    criterion_attr = VGGLoss('../../weights/celeba_vgg19_256_2_0_28_attr.pth')
+    criterion_id = VGGLoss('../../../weights/vggface2_vgg19_256_1_2_id.pth')
+    criterion_attr = VGGLoss('../../../weights/celeba_vgg19_256_2_0_28_attr.pth')
     criterion_gan = GANLoss(use_lsgan=True)
     generator = MultiScaleResUNet(in_nc=101, out_nc=3, flat_layers=(2, 2, 2, 2), ngf=128)
     discriminator = MultiscaleDiscriminator(use_sigmoid=True, num_D=2)

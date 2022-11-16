@@ -24,7 +24,7 @@ class VideoRenderer(mp.Process):
         separate_process (bool): If True, the renderer will be run in a separate process
     """
     def __init__(self, display=False, verbose=0, verbose_size=None, output_crop=False, resolution=256, crop_scale=1.2,
-                 encoder_codec='avc1', separate_process=False):
+                 encoder_codec='mp4v', separate_process=False):
         super(VideoRenderer, self).__init__()
         self._display = display
         self._verbose = verbose

@@ -128,7 +128,8 @@ class UnetUp(nn.Module):
             self.up = nn.ConvTranspose2d(in_size, out_size, kernel_size=2, stride=2)
         else:
             self.up = nn.UpsamplingBilinear2d(scale_factor=2)
-        self.conv1d = nn.Conv1d(in_size, out_size, kernel_size=(1,1))
+        # self.conv1d = nn.Conv1d(in_size, out_size, kernel_size=(1,1))
+        self.conv1d = nn.Conv2d(in_size, out_size, kernel_size=(1, 1))
 
     def forward(self, inputs1, inputs2):
         outputs2 = self.up(inputs2)

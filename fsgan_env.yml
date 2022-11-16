@@ -1,0 +1,26 @@
+name: fsgan
+channels:
+  - pytorch
+  - conda-forge
+  - anaconda
+dependencies:
+  - python=3.9.13
+  - pip=20.3.1
+  - cudatoolkit=11.6
+  - pytorch=1.12.1
+  - torchvision=0.13.1
+  - ffmpeg=4.4.1
+  - yacs=0.1.8
+  - pip:
+      - setuptools==58.2.0
+      - torch-summary==1.4.5
+      - opencv-contrib-python==4.5.4.60
+      - tensorflow==2.7.0
+      - tqdm==4.64.1
+      - matplotlib==3.6.2
+      - ffmpeg-python==0.2.0
+      - PyYAML==6.0
+      - pandas==1.5.1
+      - seaborn==0.12.1
+      - scipy==1.9.3
+      - git+https://github.com/YuvalNirkin/face_detection_dsfd.git

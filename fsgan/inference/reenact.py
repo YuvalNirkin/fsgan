@@ -312,7 +312,7 @@ class FaceReenactment(VideoProcessBase):
 
 class FaceReenactmentRenderer(VideoRenderer):
     def __init__(self, display=False, verbose=0, output_crop=False, resolution=256, crop_scale=1.2,
-                 encoder_codec='avc1', separate_process=False):
+                 encoder_codec='mp4v', separate_process=False):
         self._appearance_map = None
         self._fig = None
         self._figsize = (24, 16)
