@@ -1,6 +1,6 @@
 .idea
 *.pyc
 __pycache__
-experiments/results
+fsgan/experiments/results
 weights
 download_fsgan_models.py

@@ -24,20 +24,27 @@ every pair of faces can produce a high quality face swap.
 ## Requirements
 - High-end NVIDIA GPUs with at least 11GB of DRAM.
 - Either Linux or Windows. We recommend Linux for better performance.
-- CUDA Toolkit 10.1, CUDNN 7.5, and the latest NVIDIA driver.
-- Python 3.6+ and PyTorch 1.4.0+.
+- CUDA Toolkit 10.1+, CUDNN 7.5+, and the latest NVIDIA driver.
 
 ## Installation
-- [Ubuntu installation guide](https://github.com/YuvalNirkin/fsgan/wiki/Ubuntu-Installation-Guide)
-- [Windows installation guide](https://github.com/YuvalNirkin/fsgan/wiki/Windows-Installation-Guide)
+```Bash
+git clone https://github.com/YuvalNirkin/hyperseg
+cd hyperseg
+conda env create -f hyperseg_env.yml
+conda activate hyperseg
+pip install .    # Alternatively add the root directory of the repository to PYTHONPATH.
+```
 
 For accessing FSGAN's pretrained models and auxiliary data, please fill out
 [this form](https://docs.google.com/forms/d/e/1FAIpQLScyyNWoFvyaxxfyaPLnCIAxXgdxLEMwR9Sayjh3JpWseuYlOA/viewform?usp=sf_link).
 We will then send you a link to FSGAN's shared directory and download script.
+```Bash
+python download_fsgan_models.py   # From the repository root directory
+```
 
 ## Inference
 - [Face swapping guide](https://github.com/YuvalNirkin/fsgan/wiki/Face-Swapping-Inference)
-- [Face swapping Google Colab](inference/face_swapping.ipynb)
+- [Face swapping Google Colab](fsgan/inference/face_swapping.ipynb)
 - [Paper models guide](https://github.com/YuvalNirkin/fsgan/wiki/Paper-Models-Inference)
 
 ## Training

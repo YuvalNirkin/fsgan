@@ -51,12 +51,12 @@ parser.add_argument('-st', '--select_target', default='longest', metavar='STR',
 parser.add_argument('-b', '--batch_size', default=8, type=int, metavar='N',
                     help='mini-batch size')
 parser.add_argument('-rm', '--reenactment_model', metavar='PATH',
-                    default='../weights/nfv_msrunet_256_1_2_reenactment_v2.1.pth', help='reenactment model')
-parser.add_argument('-cm', '--completion_model', default='../weights/ijbc_msrunet_256_1_2_inpainting_v2.pth',
+                    default='weights/nfv_msrunet_256_1_2_reenactment_v2.1.pth', help='reenactment model')
+parser.add_argument('-cm', '--completion_model', default='weights/ijbc_msrunet_256_1_2_inpainting_v2.pth',
                     metavar='PATH', help='completion model')
-parser.add_argument('-bm', '--blending_model', default='../weights/ijbc_msrunet_256_1_2_blending_v2.pth',
+parser.add_argument('-bm', '--blending_model', default='weights/ijbc_msrunet_256_1_2_blending_v2.pth',
                     metavar='PATH', help='blending model')
-parser.add_argument('-ci', '--criterion_id', default="vgg_loss.VGGLoss('../weights/vggface2_vgg19_256_1_2_id.pth')",
+parser.add_argument('-ci', '--criterion_id', default="vgg_loss.VGGLoss('weights/vggface2_vgg19_256_1_2_id.pth')",
                     metavar='OBJ', help='id criterion object')
 parser.add_argument('-mr', '--min_radius', default=2.0, type=float, metavar='F',
                     help='minimum distance between points in the appearance map')
@@ -72,7 +72,7 @@ finetune.add_argument('-fi', '--finetune_iterations', default=800, type=int, met
                       help='number of finetune iterations')
 finetune.add_argument('-fl', '--finetune_lr', default=1e-4, type=float, metavar='F',
                       help='finetune learning rate')
-finetune.add_argument('-fb', '--finetune_batch_size', default=4, type=int, metavar='N',
+finetune.add_argument('-fb', '--finetune_batch_size', default=3, type=int, metavar='N',
                       help='finetune batch size')
 finetune.add_argument('-fw', '--finetune_workers', default=4, type=int, metavar='N',
                       help='finetune workers')
@@ -362,7 +362,7 @@ class FaceSwapping(VideoProcessBase):
 
 class FaceSwappingRenderer(VideoRenderer):
     def __init__(self, display=False, verbose=0, output_crop=False, resolution=256, crop_scale=1.2,
-                 encoder_codec='avc1', separate_process=False):
+                 encoder_codec='mp4v', separate_process=False):
         self._appearance_map = None
         self._fig = None
         self._figsize = (24, 16)
