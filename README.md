@@ -28,10 +28,10 @@ every pair of faces can produce a high quality face swap.
 
 ## Installation
 ```Bash
-git clone https://github.com/YuvalNirkin/hyperseg
-cd hyperseg
-conda env create -f hyperseg_env.yml
-conda activate hyperseg
+git clone https://github.com/YuvalNirkin/fsgan
+cd fsgan
+conda env create -f fsgan_env.yml
+conda activate fsgan
 pip install .    # Alternatively add the root directory of the repository to PYTHONPATH.
 ```
 
