@@ -9,7 +9,7 @@ dependencies:
   - cudatoolkit=11.6
   - pytorch=1.12.1
   - torchvision=0.13.1
-  - ffmpeg=4.4.1
+  - ffmpeg=4.*
   - yacs=0.1.8
   - pip:
       - setuptools==58.2.0
