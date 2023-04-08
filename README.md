@@ -50,6 +50,12 @@ python download_fsgan_models.py   # From the repository root directory
 ## Training
 - [Training V2](https://github.com/YuvalNirkin/fsgan/wiki/Training-V2)
 
+## Comparison on FaceForensics++
+To make it easier to compare against FSGAN, we have provided the FSGAN (original paper) results on the [FaceForensics++](https://github.com/ondyari/FaceForensics) dataset for both the C23 and C40 compressions:
+- [FaceForensics++ FSGANv1 C40](https://github.com/YuvalNirkin/fsgan/releases/download/v1.0.1/face_forensics_fsgan_v1_c40.zip)
+- [FaceForensics++ FSGANv1 C23 (part 1)](https://github.com/YuvalNirkin/fsgan/releases/download/v1.0.1/face_forensics_fsgan_v1_c23_part1.zip)
+- [FaceForensics++ FSGANv1 C23 (part 2)](https://github.com/YuvalNirkin/fsgan/releases/download/v1.0.1/face_forensics_fsgan_v1_c23_part2.zip)
+
 ## Citation
 ```
 @inproceedings{nirkin2019fsgan,
