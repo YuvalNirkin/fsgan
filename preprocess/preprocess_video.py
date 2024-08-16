@@ -18,7 +18,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
-from face_detection_dsfd.face_detector import FaceDetector
+from face_detection_dsfd.face_detection_dsfd.face_detector import FaceDetector
 from fsgan.utils.utils import set_device, load_model
 from fsgan.preprocess.detections2sequences_center import main as detections2sequences_main
 from fsgan.preprocess.crop_video_sequences import main as crop_video_sequences_main
