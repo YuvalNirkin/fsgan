@@ -35,9 +35,7 @@ conda activate fsgan
 pip install .    # Alternatively add the root directory of the repository to PYTHONPATH.
 ```
 
-For accessing FSGAN's pretrained models and auxiliary data, please fill out
-[this form](https://docs.google.com/forms/d/e/1FAIpQLScyyNWoFvyaxxfyaPLnCIAxXgdxLEMwR9Sayjh3JpWseuYlOA/viewform?usp=sf_link).
-We will then send you a link to FSGAN's shared directory and download script.
+Run the following command to download FSGAN's pretrained models:
 ```Bash
 python download_fsgan_models.py   # From the repository root directory
 ```
